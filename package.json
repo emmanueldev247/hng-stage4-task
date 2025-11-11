@@ -1,0 +1,26 @@
+{
+  "name": "notifications-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "workspaces": [
+    "gateway",
+    "user",
+    "template",
+    "email",
+    "push"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "start": "pnpm --filter gateway start",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^11.0.0"
+  }
+}
