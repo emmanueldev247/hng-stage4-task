@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
+import { CacheKeys } from 'src/cache/cache-keys';
+import { Cached } from 'src/cache/cache.decorator';
 import { UserDto } from 'src/common/dto';
 
 @Injectable()
@@ -29,6 +31,7 @@ export class UserClient {
     return user.data;
   }
 
+  @Cached('15m', (userId: string) => CacheKeys.user(userId))
   async getUserInfo(userId: string): Promise<UserDto> {
     const user = await this.axiosClient.get<UserDto>(`/users/${userId}`);
     return user.data;
