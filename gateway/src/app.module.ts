@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtStrategy } from './modules/auth/strategies';
 import { NotificationModule } from './modules/notification/notification.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -13,8 +13,9 @@ import { NotificationModule } from './modules/notification/notification.module';
     }),
     AuthModule,
     NotificationModule,
+    CacheModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  providers: [JwtStrategy],
 })
 export class AppModule {}
