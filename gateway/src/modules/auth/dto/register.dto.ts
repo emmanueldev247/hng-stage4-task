@@ -10,6 +10,14 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+class UserPreference {
+  @IsBoolean()
+  email: boolean;
+
+  @IsBoolean()
+  push: boolean;
+}
+
 export class RegisterDto {
   @IsEmail()
   @IsNotEmpty()
@@ -31,12 +39,4 @@ export class RegisterDto {
   @IsStrongPassword()
   @IsNotEmpty()
   password: string;
-}
-
-class UserPreference {
-  @IsBoolean()
-  email: boolean;
-
-  @IsBoolean()
-  push: boolean;
 }
