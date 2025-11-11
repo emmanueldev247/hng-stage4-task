@@ -17,6 +17,7 @@ A robust, fault-tolerant email notification microservice built with NestJS. It h
 _(This section can be expanded with diagrams and detailed explanations of the microservice's role in the larger system.)_
 
 ## 📁 Project Structure
+```
 email/
 ├── src/
 │   ├── controllers/
@@ -40,6 +41,8 @@ email/
 ├── tsconfig.json
 ├── .env
 └── README.md
+
+```
 ## 🛠️ Setup
 
 ### 1. Prerequisites
