@@ -19,29 +19,27 @@ _(This section can be expanded with diagrams and detailed explanations of the mi
 ## 📁 Project Structure
 email/
 ├── src/
-│ ├── controllers/
-│ │ ├── email.controller.ts
-│ │ └── health.controller.ts
-│ ├── dtos/
-│ │ ├── notification.dto.ts
-│ │ └── response.dto.ts
-│ ├── services/
-│ │ ├── email.service.ts
-│ │ ├── sendgrid.service.ts
-│ │ ├── circuit-breaker.service.ts
-│ │ └── redis.service.ts
-│ ├── email.module.ts
-│ └── main.ts
+│   ├── controllers/
+│   │   ├── email.controller.ts
+│   │   └── health.controller.ts
+│   ├── dtos/
+│   │   ├── notification.dto.ts
+│   │   └── response.dto.ts
+│   ├── services/
+│   │   ├── email.service.ts
+│   │   ├── sendgrid.service.ts
+│   │   ├── circuit-breaker.service.ts
+│   │   └── redis.service.ts
+│   ├── email.module.ts
+│   └── main.ts
 ├── test/
-│ ├── email.service.spec.ts
-│ └── app.e2e-spec.ts
+│   ├── email.service.spec.ts
+│   └── app.e2e-spec.ts
 ├── docker-compose.yml
-├── Dockerfile
 ├── package.json
 ├── tsconfig.json
 ├── .env
 └── README.md
-
 ## 🛠️ Setup
 
 ### 1. Prerequisites
