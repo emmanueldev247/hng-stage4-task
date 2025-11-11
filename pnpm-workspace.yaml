@@ -1,0 +1,6 @@
+packages:
+  - "gateway"
+  - "user"
+  - "template"
+  - "email"
+  - "push"
