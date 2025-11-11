@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtStrategy } from './modules/auth/strategies';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from './cache/cache.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CacheModule } from './cache/cache.module';
     AuthModule,
     NotificationModule,
     CacheModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [JwtStrategy],
