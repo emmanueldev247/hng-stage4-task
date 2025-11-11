@@ -1,0 +1,176 @@
+{
+  "vhosts": [{ "name": "/" }],
+  "users": [],
+  "permissions": [],
+  "parameters": [],
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "dlx-and-limit-main-queues",
+      "pattern": "^(email|push)\\.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "dead-letter-exchange": "notifications.dlx",
+        "delivery-limit": 5
+      },
+      "priority": 0
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "notifications.direct",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "notifications.retry",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "notifications.dlx",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "email.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "push.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "email.retry.30s",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "notifications.direct",
+        "x-dead-letter-routing-key": "email"
+      }
+    },
+    {
+      "name": "email.retry.2m",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "notifications.direct",
+        "x-dead-letter-routing-key": "email"
+      }
+    },
+    {
+      "name": "push.retry.30s",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "notifications.direct",
+        "x-dead-letter-routing-key": "push"
+      }
+    },
+    {
+      "name": "push.retry.2m",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "notifications.direct",
+        "x-dead-letter-routing-key": "push"
+      }
+    },
+
+    {
+      "name": "failed.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "notifications.direct",
+      "vhost": "/",
+      "destination": "email.queue",
+      "destination_type": "queue",
+      "routing_key": "email",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.direct",
+      "vhost": "/",
+      "destination": "push.queue",
+      "destination_type": "queue",
+      "routing_key": "push",
+      "arguments": {}
+    },
+
+    {
+      "source": "notifications.retry",
+      "vhost": "/",
+      "destination": "email.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "email.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry",
+      "vhost": "/",
+      "destination": "email.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "email.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry",
+      "vhost": "/",
+      "destination": "push.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "push.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry",
+      "vhost": "/",
+      "destination": "push.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "push.retry.2m",
+      "arguments": {}
+    },
+
+    {
+      "source": "notifications.dlx",
+      "vhost": "/",
+      "destination": "failed.queue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}
