@@ -59,7 +59,11 @@ export class UsersService {
     const password_hash = await bcrypt.hash(password, salt);
 
     // C. Create the new preference entity
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     const newPreference = this.preferenceRepository.create({
       email_notifications: preferences.email_notifications,
       push_notifications: preferences.push_notifications,
@@ -72,7 +76,11 @@ export class UsersService {
 =======
 
     // D. Create the new user entity
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     const newUser = this.userRepository.create({
       name,
       email,
@@ -118,7 +126,11 @@ export class UsersService {
 
     // G. Return the saved user (Hash is already hidden by 'select: false)
     return savedUser;
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
   }
 
   async getContactInfo(id: string) {
@@ -147,7 +159,11 @@ export class UsersService {
 =======
         email_notifications: user.preference.email_notifications,
         push_notifications: user.preference.push_notifications,
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
       },
     };
   }
@@ -181,7 +197,11 @@ export class UsersService {
 <<<<<<< HEAD
     // 1. Find the user
 =======
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -224,7 +244,11 @@ export class UsersService {
       device_token: addDeviceDto.device_token,
       device_type: addDeviceDto.device_type || 'unknown',
       user: user,
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     });
 
     return this.deviceRepository.save(newDevice);
@@ -285,7 +309,11 @@ export class UsersService {
   async remove(id: string) {
     // 1. Find the user
     const user = await this.userRepository.findOne({ where: { id } });
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -310,6 +338,10 @@ export class UsersService {
 =======
     // 2. Delete
     await this.userRepository.remove(user);
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
   }
 }

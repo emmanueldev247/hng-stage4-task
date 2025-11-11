@@ -36,7 +36,11 @@ export class User {
     cascade: true, // This is your shortcut! Auto-saves the preference.
   })
   @JoinColumn({ name: 'preference_id' }) // This creates the foreign key column
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
   preference: UserPreference;
 
   // Other relationship

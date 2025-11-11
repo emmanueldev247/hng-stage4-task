@@ -30,7 +30,11 @@ export class UserDevice {
 =======
   @ManyToOne(() => User, (user) => user.devices)
   @JoinColumn({ name: 'user_id' }) // Create the foreign key
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
   user: User;
 
   @CreateDateColumn({ name: 'created_at' })

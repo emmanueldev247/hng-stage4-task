@@ -19,7 +19,11 @@ import { UsersModule } from './users/users.module';
 =======
       imports: [ConfigModule], // We need ConfigModule to use ConfigService
       inject: [ConfigService], // Inject the ConfigService
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST'),
@@ -39,7 +43,11 @@ import { UsersModule } from './users/users.module';
         // This is your magic bullet for the sprint.
         // It auto-updates your database tables when you change
         // your entity files. No migrations needed.
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
         synchronize: true,
       }),
     }),
@@ -47,7 +55,11 @@ import { UsersModule } from './users/users.module';
 <<<<<<< HEAD
 =======
     // 3. The UsersModule (which you generated)
+<<<<<<< HEAD
 >>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
+=======
+>>>>>>> b78dd23 (feat(user-service): add coplete user service API (untested))
+>>>>>>> eacfed9 (feat(user-service): add coplete user service API (untested))
     UsersModule,
   ],
   controllers: [],
