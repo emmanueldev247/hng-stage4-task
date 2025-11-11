@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtStrategy } from './modules/auth/strategies';
-import { UserClient } from './clients';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -12,8 +12,9 @@ import { UserClient } from './clients';
       isGlobal: true,
     }),
     AuthModule,
+    NotificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy, UserClient],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule {}
