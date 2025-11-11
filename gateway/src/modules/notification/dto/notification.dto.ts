@@ -8,7 +8,7 @@ import {
 export class NotificationDto {
   @IsString()
   @IsNotEmpty()
-  template_id: string;
+  template_code: string;
 
   @IsObject()
   @IsNotEmptyObject()

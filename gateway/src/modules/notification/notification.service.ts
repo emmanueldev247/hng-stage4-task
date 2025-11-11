@@ -12,24 +12,24 @@ export class NotificationService {
   ) {}
 
   async sendNotification(user_id: string, data: NotificationDto) {
-    const { template_id, variables } = data;
+    const { template_code, variables } = data;
     const request_id = randomUUID();
     const user = await this.userClient.getUserInfo(user_id);
     const { name, email, preferences, device_tokens } = user;
     if (preferences.email_notifications) {
       this.client.emit('notifications.email', {
         request_id,
-        template_id,
-        variables,
+        template_code,
+        data: variables,
         to: { name, email },
       });
     }
     if (preferences.push_notifications) {
       this.client.emit('notifications.push', {
         request_id,
-        template_id,
+        template_code,
         to: { name, device_tokens },
-        variables,
+        data: variables,
       });
     }
     return {
