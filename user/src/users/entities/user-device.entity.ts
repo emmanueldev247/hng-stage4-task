@@ -22,10 +22,15 @@ export class UserDevice {
   @Column({ name: 'device_type', nullable: true }) // e.g., 'ios', 'android', 'web'
   device_type: string;
 
+<<<<<<< HEAD
   @ManyToOne(() => User, (user) => user.devices, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
+=======
+  @ManyToOne(() => User, (user) => user.devices)
+  @JoinColumn({ name: 'user_id' }) // Create the foreign key
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
   user: User;
 
   @CreateDateColumn({ name: 'created_at' })

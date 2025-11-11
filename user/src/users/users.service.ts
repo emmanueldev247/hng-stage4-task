@@ -30,6 +30,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+<<<<<<< HEAD
     const { email, password, name, preferences, push_token } = createUserDto;
 
     const existingUser = await this.userRepository.findOne({ where: { email } });
@@ -41,18 +42,42 @@ export class UsersService {
     const password_hash = await bcrypt.hash(password, salt);
 
     // 1 Create preference
+=======
+    const { email, name, preferences, push_token } = createUserDto;
+    const password = createUserDto.password;
+
+    // A. Check if user exists
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new NotFoundException('User with this email already exists');
+    }
+
+    // B. Hash the password
+    const salt = await bcrypt.genSalt();
+    const password_hash = await bcrypt.hash(password, salt);
+
+    // C. Create the new preference entity
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
     const newPreference = this.preferenceRepository.create({
       email_notifications: preferences.email_notifications,
       push_notifications: preferences.push_notifications,
     });
+<<<<<<< HEAD
     // Save first in order to link it
     await this.preferenceRepository.save(newPreference);
 
     //2 Create the user
+=======
+
+    // D. Create the new user entity
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
     const newUser = this.userRepository.create({
       name,
       email,
       password_hash,
+<<<<<<< HEAD
       preference: newPreference // Link saved preference
     });
     // Save the user
@@ -71,6 +96,29 @@ export class UsersService {
 
     // Return the user
     return newUser;
+=======
+      preference: newPreference, // Link the preference
+    });
+
+    // E. Handle the optional push_token
+    if (push_token) {
+      const newDevice = this.deviceRepository.create({
+        device_token: push_token,
+        user: newUser, // Link it back to the (not-yet-saved) user
+        device_type: 'unknown',
+      });
+      // Link it to the user object
+      newUser.devices = [newDevice];
+    }
+
+    // F. Save the user.
+    // Because of 'cascade: true' in entities,
+    // This will save the newPreference and newDevice as well.
+    const savedUser = await this.userRepository.save(newUser);
+
+    // G. Return the saved user (Hash is already hidden by 'select: false)
+    return savedUser;
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
   }
 
   async getContactInfo(id: string) {
@@ -93,8 +141,13 @@ export class UsersService {
       email: user.email,
       device_tokens: device_tokens,
       preferences: {
+<<<<<<< HEAD
         email_notifications: user.preference?.email_notifications,
         push_notifications: user.preference?.push_notifications,
+=======
+        email_notifications: user.preference.email_notifications,
+        push_notifications: user.preference.push_notifications,
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
       },
     };
   }
@@ -125,12 +178,16 @@ export class UsersService {
     return result;
   }
   async addDevice(userId: string, addDeviceDto: AddDeviceDto) {
+<<<<<<< HEAD
     // 1. Find the user
+=======
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+<<<<<<< HEAD
     // 2. Check if this token is *already registered for this user*
     const existingDevice = await this.deviceRepository.findOne({
       where: {
@@ -149,6 +206,25 @@ export class UsersService {
       device_token: addDeviceDto.device_token,
       device_type: addDeviceDto.device_type || 'unknown',
       user: user, // Link it to the user
+=======
+    const existingDevice = await this.deviceRepository.findOne({
+      where: { device_token: addDeviceDto.device_token },
+      relations: ['user'],
+    });
+
+    if (existingDevice) {
+      if (existingDevice.user.id === userId) {
+        return existingDevice;
+      }
+      existingDevice.user = user;
+      return this.deviceRepository.save(existingDevice);
+    }
+
+    const newDevice = this.deviceRepository.create({
+      device_token: addDeviceDto.device_token,
+      device_type: addDeviceDto.device_type || 'unknown',
+      user: user,
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
     });
 
     return this.deviceRepository.save(newDevice);
@@ -197,6 +273,7 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+<<<<<<< HEAD
   async remove(id: string): Promise<void> {
     // 1. Find the user preference relation
     const user = await this.userRepository.findOne({
@@ -204,10 +281,16 @@ export class UsersService {
       relations: ['preference'],
     });
 
+=======
+  async remove(id: string) {
+    // 1. Find the user
+    const user = await this.userRepository.findOne({ where: { id } });
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+<<<<<<< HEAD
     // 2. Get the ID of the preference *before* we break the link
     const preferenceId = user.preference ? user.preference.id : null;
 
@@ -224,5 +307,9 @@ export class UsersService {
     if (preferenceId) {
       await this.preferenceRepository.delete(preferenceId);
     }
+=======
+    // 2. Delete
+    await this.userRepository.remove(user);
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
   }
 }

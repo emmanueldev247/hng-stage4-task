@@ -27,10 +27,16 @@ export class User {
 
   // It says one User has one UserPreference
   @OneToOne(() => UserPreference, (preference) => preference.user, {
+<<<<<<< HEAD
     cascade: true, //Auto-saves the preference.
     nullable:true,
   })
   @JoinColumn({ name: 'preference_id' }) // Create the foreign key column
+=======
+    cascade: true, // This is your shortcut! Auto-saves the preference.
+  })
+  @JoinColumn({ name: 'preference_id' }) // This creates the foreign key column
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
   preference: UserPreference;
 
   // Other relationship

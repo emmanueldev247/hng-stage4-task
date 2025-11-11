@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+<<<<<<< HEAD
 import { ValidationPipe } from '@nestjs/common';
+=======
+import { ValidationPipe } from '@nestjs/common'; // <-- IMPORT THIS
+>>>>>>> 65208b1 (feat(user-service): add coplete user service API (untested))
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
