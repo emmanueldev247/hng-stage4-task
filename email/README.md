@@ -1,10 +1,10 @@
 # Email Service Microservice
 
-A robust, fault-tolerant email notification microservice built with NestJS, designed to handle asynchronous email delivery through RabbitMQ message queues. Part of a distributed notification system.
+A robust, fault-tolerant email notification microservice built with NestJS. It handles asynchronous email delivery through RabbitMQ message queues as part of a distributed notification system.
 
 ## 🚀 Features
 
-- **Asynchronous Processing**: RabbitMQ message queue integration for reliable email delivery
+- **Asynchronous Processing**: RabbitMQ integration for reliable, non-blocking email delivery.
 - **SendGrid Integration**: Professional email delivery with retry mechanisms
 - **Circuit Breaker Pattern**: Prevents cascading failures when external services are down
 - **Idempotency**: Prevents duplicate email sends using Redis
@@ -14,9 +14,10 @@ A robust, fault-tolerant email notification microservice built with NestJS, desi
 - **API Documentation**: Auto-generated Swagger/OpenAPI docs
 
 ## 🏗️ System Architecture
+_(This section can be expanded with diagrams and detailed explanations of the microservice's role in the larger system.)_
 
 ## 📁 Project Structure
-email-service/
+email/
 ├── src/
 │ ├── controllers/
 │ │ ├── email.controller.ts
@@ -41,39 +42,41 @@ email-service/
 ├── .env
 └── README.md
 
-text
+## 🛠️ Setup
 
-## 📋 Prerequisites
+### 1. Prerequisites
 
-- Node.js 18+
-- RabbitMQ
-- Redis
-- SendGrid account (optional for development)
+- Node.js (v18+)
+- Docker & Docker Compose
+- SendGrid Account (optional for development, emails will be logged to the console)
 
-## 🛠️ Installation
+### 2. Installation
 
-1. **Clone the repository**
 ```bash
+# 1. Clone the repository
 git clone <repository-url>
 cd hng-stage4-task/email-service
-Install dependencies
 
-bash
+# 2. Install dependencies
 npm install
-Set up environment variables
+```
 
-bash
+### 3. Configuration
+
+Create a `.env` file from the example and fill in your details.
+
+```bash
 cp .env.example .env
-# Edit .env with your configuration
-⚙️ Configuration
-Environment Variables
-env
+```
+
+**`.env` Variables:**
+```env
 # Service Configuration
 NODE_ENV=development
 PORT=3001
 
 # RabbitMQ
-RABBITMQ_URL=amqp://localhost:5672
+RABBITMQ_URL=amqp://guest:guest@localhost:5672
 
 # SendGrid (Optional for development)
 SENDGRID_API_KEY=your_sendgrid_api_key
@@ -81,123 +84,132 @@ SENDGRID_FROM_EMAIL=noreply@yourapp.com
 
 # Redis
 REDIS_URL=redis://localhost:6379
+```
+> **Note**: The service can run without a `SENDGRID_API_KEY`. In this mode, emails are logged to the console instead of being sent.
 
-# External Services (For future integration)
-USER_SERVICE_URL=http://localhost:3002
-TEMPLATE_SERVICE_URL=http://localhost:3003
-Development without SendGrid
-The service runs in development mode without a SendGrid API key, logging emails instead of sending them.
+### 4. Running the Service
 
-🚀 Quick Start
-Using Docker (Recommended)
-bash
-# Start all dependencies
-docker-compose up -d rabbitmq redis
+**Using Docker (Recommended):**
 
-# Start the service
-npm run start:dev
-Manual Setup
-Start RabbitMQ
+This command starts the email service along with its dependencies (RabbitMQ and Redis).
 
-bash
+```bash
+docker-compose up -d
+```
+
+**Manual Setup:**
+
+If you prefer not to use Docker Compose, you can run the dependencies and the app separately.
+
+```bash
+# 1. Start RabbitMQ
 docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-Start Redis
 
-bash
-docker run -d --name redis -p 6379:6379 redis:alpine
-Run the service
+# 2. Start Redis
+docker run -d --name redis -p 6379:6379 redis:7-alpine
 
-bash
+# 3. Run the service
 npm run start:dev
-📡 API Usage
-Message Format
-Send messages to RabbitMQ queue email.queue with this format:
+```
 
-json
+## 📡 API Reference
+
+This service does not expose a public HTTP API for sending emails. Instead, it consumes messages from a RabbitMQ queue.
+
+### Message Format
+
+To trigger an email, publish a message to the `notifications.direct` exchange with the routing key `email.queue`.
+
+**Payload Structure:**
+```json
 {
-  "notification_type": "email",
-  "user_id": "123e4567-e89b-12d3-a456-426614174000",
-  "template_code": "welcome",
-  "variables": {
-    "name": "John Doe",
-    "link": "https://example.com"
-  },
-  "request_id": "unique-request-id-123",
-  "priority": 1,
-  "metadata": {
-    "campaign": "welcome_series"
+  "pattern": { "cmd": "email_notification" },
+  "data": {
+    "notification_type": "email",
+    "user_id": "123e4567-e89b-12d3-a456-426614174000",
+    "template_code": "welcome",
+    "variables": {
+      "name": "John Doe",
+      "link": "https://example.com"
+    },
+    "request_id": "unique-request-id-123",
+    "priority": 1
   }
 }
-Available Templates
-welcome - Welcome email for new users
+```
 
-reset_password - Password reset instructions
+### Available Templates
 
-notification - General notifications
+- `welcome`: Welcome email for new users.
+- `reset_password`: Password reset instructions.
 
-Health Endpoints
-GET /health - Basic service health
+### Health Endpoints
 
-GET /health/detailed - Detailed health with dependencies
+The service exposes HTTP endpoints for health monitoring.
 
-API Documentation
-Swagger UI available at: http://localhost:3001/api
+- `GET /health`: Basic service health check.
+- `GET /health/detailed`: Detailed health check including dependencies (Redis, SendGrid).
 
-🔧 Development
-Available Scripts
-bash
-# Development
+### API Documentation
+
+Swagger UI is available at `http://localhost:3001/api` for exploring the health endpoints.
+
+## 💻 Development Workflow
+
+### Available Scripts
+
+```bash
+# Run in development mode with hot-reloading
 npm run start:dev
 
-# Production build
+# Build for production
 npm run build
+
+# Run in production mode
 npm run start:prod
 
-# Testing
+# Run unit tests
 npm test
+
+# Run end-to-end tests
 npm run test:e2e
-npm run test:cov
 
-# Code quality
+# Run code linter
 npm run lint
-npm run format
-Testing the Service
-Start the service
+```
 
-bash
+### Sending a Test Message
+
+A helper script is provided to send a test message to the RabbitMQ queue.
+
+```bash
+# Ensure the service is running first
 npm run start:dev
-Send test message
 
-bash
+# In a new terminal, send the test message
 npx ts-node test-send-message.ts
-Check logs for processing
+```
 
-bash
-# Should see in logs:
-# [EmailController] Received email notification: test-request-xxx
-# [SendGridService] Email sent successfully to: user-xxx@example.com
-# [EmailService] Email notification processed successfully: test-request-xxx
-🧪 Testing
-Test Scripts
-test-send-message.ts
+You should see log output in the service terminal confirming the message was received and processed.
 
-typescript
+**`test-send-message.ts`**
+```typescript
 import * as amqp from 'amqplib';
 
 async function sendTestMessage() {
   const connection = await amqp.connect('amqp://localhost:5672');
   const channel = await connection.createChannel();
   
-  const message = {
-    notification_type: 'email',
-    user_id: '123e4567-e89b-12d3-a456-426614174000',
-    template_code: 'welcome',
-    variables: {
-      name: 'John Doe',
-      link: 'https://example.com',
+  const message = { // NestJS microservice expects this format
+    pattern: { cmd: 'email_notification' },
+    data: {
+      notification_type: 'email',
+      user_id: '123e4567-e89b-12d3-a456-426614174000',
+      template_code: 'welcome',
+      variables: { name: 'John Doe', link: 'https://example.com' },
+      request_id: 'test-request-' + Date.now(),
+      priority: 1,
     },
-    request_id: 'test-request-' + Date.now(),
-    priority: 1,
   };
 
   await channel.assertExchange('notifications.direct', 'direct', { durable: true });
@@ -209,31 +221,23 @@ async function sendTestMessage() {
 }
 
 sendTestMessage();
-🔒 Resilience Features
-Circuit Breaker
-Opens after 5 consecutive failures
+```
 
-Resets after 60 seconds
+### Debugging
 
-Prevents cascading failures
+- **RabbitMQ Connection**: Ensure RabbitMQ is running on port `5672`. Check credentials in `.env`.
+- **Redis Connection**: Verify Redis is running on port `6379`.
+- **Message Format**: Double-check that the message published to RabbitMQ matches the specified format.
+- **Service Logs**: Use `docker logs <container_id>` to view detailed logs from the service.
 
-Retry Mechanism
-Exponential backoff (1s, 2s, 4s)
+## 🚢 Deployment
 
-Maximum 3 retry attempts
+### Docker
 
-Failed messages go to DLQ
+The service is containerized for easy and consistent deployments. The `docker-compose.yml` file orchestrates the service and its dependencies.
 
-Idempotency
-Redis-based request ID tracking
-
-24-hour duplicate prevention
-
-Exactly-once delivery semantics
-
-🐳 Docker Deployment
-docker-compose.yml
-yaml
+**`docker-compose.yml`**
+```yaml
 version: '3.8'
 services:
   email-service:
@@ -261,8 +265,10 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-Dockerfile
-dockerfile
+```
+
+**`Dockerfile`**
+```dockerfile
 FROM node:18-alpine
 WORKDIR /app
 COPY package*.json ./

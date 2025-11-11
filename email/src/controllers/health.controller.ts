@@ -16,7 +16,7 @@ export class HealthController {
     const health = {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      service: 'email-service',
+      service: 'email',
       version: '1.0.0',
     };
 
