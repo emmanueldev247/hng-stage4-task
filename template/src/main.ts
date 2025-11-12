@@ -22,8 +22,8 @@ async function bootstrap() {
     .addTag('templates')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/docs', app, document, {
-    jsonDocumentUrl: '/docs-json',
+  SwaggerModule.setup('/api/docs', app, document, {
+    jsonDocumentUrl: '/api/docs-json',
   });
 
   await app.listen(process.env.PORT ?? 3002);
