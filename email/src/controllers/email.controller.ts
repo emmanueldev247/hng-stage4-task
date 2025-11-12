@@ -1,8 +1,7 @@
-// src/controllers/email.controller.ts
 import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+import { EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
 import { EmailService } from '../services/email.service';
-import { NotificationRequestDto } from '../dtos/notification.dto';
+import { SimplifiedNotificationDto } from '../dtos/notification.dto';
 
 @Controller()
 export class EmailController {
@@ -10,37 +9,52 @@ export class EmailController {
 
   constructor(private readonly emailService: EmailService) {}
 
-  async onApplicationBootstrap() {
-    this.logger.log('Email Controller started and listening for messages');
+  async onModuleInit() {
+    this.logger.log('✅ Email Controller initialized - waiting for messages...');
   }
 
-  // Use a pattern that matches what NestJS expects
-  @MessagePattern({ cmd: 'email_notification' })
+  async onApplicationBootstrap() {
+    this.logger.log('🚀 Email microservice ready - listening on email.queue');
+  }
+
+  @EventPattern('email.notification')
   async handleEmailNotification(
-    @Payload() data: NotificationRequestDto,
+    @Payload() data: any,
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
+    
+    this.logger.log('📨 Received RabbitMQ message');
 
     try {
-      this.logger.log(`Received email notification: ${data.request_id}`);
-      
-      // Validate the data structure
-      if (!data.request_id || !data.notification_type) {
-        throw new Error('Invalid message format: missing required fields');
+      // Extract data 
+      const notificationData = data.pattern && data.data ? data.data : data;
+
+      // MINIMAL VALIDATION - Critical fields only
+      if (!notificationData?.request_id) {
+        throw new Error('Missing request_id - cannot ensure idempotency');
       }
 
-      // Process the notification
-      await this.emailService.processEmailNotification(data);
+      if (!notificationData?.to || !notificationData.to.includes('@')) {
+        throw new Error('Invalid email address format');
+      }
 
-      // Acknowledge the message
+      if (!notificationData?.subject?.trim()) {
+        throw new Error('Empty email subject');
+      }
+
+      this.logger.log(`📧 Processing email: ${notificationData.request_id}`);
+      
+      // Process the email
+      await this.emailService.processEmailNotification(notificationData as SimplifiedNotificationDto);
+
       channel.ack(originalMsg);
-      this.logger.log(`Email notification processed successfully: ${data.request_id}`);
+      this.logger.log(`✅ Email sent successfully: ${notificationData.request_id}`);
+      
     } catch (error) {
-      this.logger.error(`Failed to process email notification ${data.request_id}:`, error);
-
-      // Reject the message and don't requeue (will go to DLQ)
+      this.logger.error(`❌ Failed to process: ${error.message}`);
+      // Send to DLQ for investigation
       channel.nack(originalMsg, false, false);
     }
   }
