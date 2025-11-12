@@ -441,17 +441,17 @@ This project is currently UNLICENSED. Refer to the `package.json` file for more 
 
 ## Author Info
 
-👋 **Emmanuel Okwudili**
+👋 **Oluwaseyi Oke**
 
-Experienced Software Engineer specializing in backend development. Connect with me!
+Experienced Software Developer specializing in backend development. Connect with me!
 
--   **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/emmanuelokwudili)
--   **Portfolio**: [Your Portfolio Website](https://your-portfolio.com)
--   **Email**: [Your Email Address](mailto:youremail@example.com)
+-   **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/oluwaseyi-oke-fullstack-developer)
+-   **Portfolio**: [Your Portfolio Website](https://oke-oluwaseyi-portfolio.vercel.app)
+-   **Email**: [Your Email Address](mailto:okeoluwaseyimarvellous@gmail.com)
 
 ---
 
-[![Maintained by Emmanuel](https://img.shields.io/badge/Maintained%20by-Emmanuel-blue)](https://github.com/emmanueldev247)
+[![Maintained by iamArvy](https://img.shields.io/badge/Maintained%20by-iamArvy-blue)](https://github.com/iamArvy)
 [![Made with NestJS](https://img.shields.io/badge/Made%20with-NestJS-red)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js-green?logo=node.js)](https://nodejs.org/)
