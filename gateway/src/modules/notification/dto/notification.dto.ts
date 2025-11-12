@@ -12,5 +12,5 @@ export class NotificationDto {
 
   @IsObject()
   @IsNotEmptyObject()
-  variables: object;
+  variables: Record<string, string>;
 }

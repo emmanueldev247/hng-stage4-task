@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
-import { UserClient } from 'src/clients';
+import { TemplateClient, UserClient } from 'src/clients';
 
 @Module({
   imports: [
@@ -29,6 +29,6 @@ import { UserClient } from 'src/clients';
     ]),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, UserClient],
+  providers: [NotificationService, UserClient, TemplateClient],
 })
 export class NotificationModule {}
