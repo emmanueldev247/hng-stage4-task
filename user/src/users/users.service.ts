@@ -30,53 +30,47 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { email, name, preferences, push_token } = createUserDto;
-    const password = createUserDto.password;
+    const { email, password, name, preferences, push_token } = createUserDto;
 
-    // A. Check if user exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email },
-    });
+    const existingUser = await this.userRepository.findOne({ where: { email } });
     if (existingUser) {
-      throw new NotFoundException('User with this email already exists');
+      throw new NotFoundException('User with this email alreadya exists');
     }
 
-    // B. Hash the password
     const salt = await bcrypt.genSalt();
     const password_hash = await bcrypt.hash(password, salt);
 
-    // C. Create the new preference entity
+    // 1 Create preference
     const newPreference = this.preferenceRepository.create({
       email_notifications: preferences.email_notifications,
       push_notifications: preferences.push_notifications,
     });
+    // Save first in order to link it
+    await this.preferenceRepository.save(newPreference);
 
-    // D. Create the new user entity
+    //2 Create the user
     const newUser = this.userRepository.create({
       name,
       email,
       password_hash,
-      preference: newPreference, // Link the preference
+      preference: newPreference // Link saved preference
     });
+    // Save the user
+    await this.userRepository.save(newUser);
 
-    // E. Handle the optional push_token
+    //3 Handle the devive
     if (push_token) {
       const newDevice = this.deviceRepository.create({
         device_token: push_token,
-        user: newUser, // Link it back to the (not-yet-saved) user
+        user: newUser,
         device_type: 'unknown',
       });
-      // Link it to the user object
-      newUser.devices = [newDevice];
+      // Save the device
+      await this.deviceRepository.save(newDevice);
     }
 
-    // F. Save the user.
-    // Because of 'cascade: true' in entities,
-    // This will save the newPreference and newDevice as well.
-    const savedUser = await this.userRepository.save(newUser);
-
-    // G. Return the saved user (Hash is already hidden by 'select: false)
-    return savedUser;
+    // Return the user
+    return newUser;
   }
 
   async getContactInfo(id: string) {
@@ -99,8 +93,8 @@ export class UsersService {
       email: user.email,
       device_tokens: device_tokens,
       preferences: {
-        email_notifications: user.preference.email_notifications,
-        push_notifications: user.preference.push_notifications,
+        email_notifications: user.preference?.email_notifications,
+        push_notifications: user.preference?.push_notifications,
       },
     };
   }
@@ -131,28 +125,30 @@ export class UsersService {
     return result;
   }
   async addDevice(userId: string, addDeviceDto: AddDeviceDto) {
+    // 1. Find the user
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+    // 2. Check if this token is *already registered for this user*
     const existingDevice = await this.deviceRepository.findOne({
-      where: { device_token: addDeviceDto.device_token },
-      relations: ['user'],
+      where: {
+        device_token: addDeviceDto.device_token,
+        user: { id: userId }, // Check for this specific user
+      },
     });
 
+    // 3. If the user already has this token, just return.
     if (existingDevice) {
-      if (existingDevice.user.id === userId) {
-        return existingDevice;
-      }
-      existingDevice.user = user;
-      return this.deviceRepository.save(existingDevice);
+      return existingDevice;
     }
 
+    // 4. Create and save the new device
     const newDevice = this.deviceRepository.create({
       device_token: addDeviceDto.device_token,
       device_type: addDeviceDto.device_type || 'unknown',
-      user: user,
+      user: user, // Link it to the user
     });
 
     return this.deviceRepository.save(newDevice);
@@ -201,14 +197,32 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async remove(id: string) {
-    // 1. Find the user
-    const user = await this.userRepository.findOne({ where: { id } });
+  async remove(id: string): Promise<void> {
+    // 1. Find the user preference relation
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['preference'],
+    });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // 2. Delete
+    // 2. Get the ID of the preference *before* we break the link
+    const preferenceId = user.preference ? user.preference.id : null;
+
+    // 3. Break the link from User -> Preference
+    if (user.preference) {
+      user.preference = null as any; 
+      await this.userRepository.save(user);
+    }
+
+    // 4. Delete the User.
     await this.userRepository.remove(user);
+
+    // 5. Finally, clean up the orphaned preference
+    if (preferenceId) {
+      await this.preferenceRepository.delete(preferenceId);
+    }
   }
 }

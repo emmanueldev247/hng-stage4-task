@@ -13,8 +13,8 @@ import { UsersModule } from './users/users.module';
 
     // 2. Connect to the database (TypeORM)
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // We need ConfigModule to use ConfigService
-      inject: [ConfigService], // Inject the ConfigService
+      imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DB_HOST'),
@@ -23,18 +23,12 @@ import { UsersModule } from './users/users.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
 
-        // This is CRITICAL. It tells TypeORM to find all
-        // files that end in .entity.ts
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
 
-        // This is your magic bullet for the sprint.
-        // It auto-updates your database tables when you change
-        // your entity files. No migrations needed.
         synchronize: true,
       }),
     }),
 
-    // 3. The UsersModule (which you generated)
     UsersModule,
   ],
   controllers: [],
