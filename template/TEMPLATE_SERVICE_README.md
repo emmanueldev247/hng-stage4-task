@@ -5,7 +5,7 @@ The **Template Service** is one of the microservices in the Distributed Notifica
 - **Language/Framework:** Node.js (NestJS), TypeScript
 - **Database:** PostgreSQL (`templates_db`)
 - **ORM:** TypeORM
-- **Docs:** Swagger at `/docs`
+- **Docs:** Swagger at `/api/docs`
 - **Health:** `/health` (service + DB check)
 - **Port (default):** `3002`
 - **Admin Auth:** API Key required via `x-api-key` for mutating endpoints (**POST**, **PATCH**, **DELETE**).
@@ -114,7 +114,7 @@ INDEX : template_code
 
 ### Swagger
 
-- **URL:** `GET /docs`
+- **URL:** `GET /api/docs`
 - DTOs are decorated with `@nestjs/swagger` and include examples.
 - Admin endpoints are annotated to show required header: `x-api-key`.
 
