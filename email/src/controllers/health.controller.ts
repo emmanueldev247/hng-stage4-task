@@ -1,11 +1,12 @@
-// src/controllers/health.controller.ts
-import { Controller, Get } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../services/redis.service';
+import { Controller, Get, Logger } from '@nestjs/common';
 import { ResponseDto } from '../dtos/response.dto';
+import { RedisService } from '../services/redis.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('health')
 export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
   constructor(
     private configService: ConfigService,
     private redisService: RedisService,
@@ -13,14 +14,12 @@ export class HealthController {
 
   @Get()
   async checkHealth() {
-    const health = {
+    return ResponseDto.success({
       status: 'ok',
       timestamp: new Date().toISOString(),
-      service: 'email',
-      version: '1.0.0',
-    };
-
-    return ResponseDto.success(health, 'Service is healthy');
+      service: 'email-service',
+      version: '1.0.0'
+    }, 'Service is healthy');
   }
 
   @Get('detailed')
@@ -30,7 +29,9 @@ export class HealthController {
       sendgrid: this.configService.get('SENDGRID_API_KEY') ? 'configured' : 'not_configured',
     };
 
-    const allHealthy = Object.values(checks).every(status => status === 'healthy' || status === 'configured');
+    const allHealthy = Object.values(checks).every(status => 
+      status === 'healthy' || status === 'configured'
+    );
 
     const health = {
       status: allHealthy ? 'healthy' : 'degraded',
@@ -38,7 +39,10 @@ export class HealthController {
       checks,
     };
 
-    return ResponseDto.success(health, allHealthy ? 'All systems operational' : 'Some systems are degraded');
+    return ResponseDto.success(
+      health, 
+      allHealthy ? 'All systems operational' : 'Some systems are degraded'
+    );
   }
 
   private async checkRedis(): Promise<'healthy' | 'unhealthy'> {
