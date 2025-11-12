@@ -60,3 +60,6 @@ Thumbs.db
 # Lock files for each service (if any)
 */package-lock.json
 */yarn.lock
+
+#wslrun
+.wslrun
