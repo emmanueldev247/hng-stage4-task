@@ -3,7 +3,7 @@ import { NotificationPayloadDto } from './dto/notification-payload.dto';
 import { FirebaseService } from 'src/firebase/firebase.provider';
 import { CacheService } from 'src/cache/cache.service';
 import { ProcessedRequestDto } from './dto/processed-request.dto';
-import CircuitBreaker from 'opossum';
+import * as CircuitBreaker from 'opossum';
 
 @Injectable()
 export class NotificationService {
