@@ -6,6 +6,7 @@ import { JwtStrategy } from './modules/auth/strategies';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from './cache/cache.module';
 import { UserModule } from './modules/user/user.module';
+import { TemplateModule } from './modules/template/template.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserModule } from './modules/user/user.module';
     NotificationModule,
     CacheModule,
     UserModule,
+    TemplateModule,
   ],
   controllers: [AppController],
   providers: [JwtStrategy],
