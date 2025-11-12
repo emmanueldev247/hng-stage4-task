@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginationMetaDto {
@@ -32,18 +30,4 @@ export class PaginationMetaDto {
     this.has_next = page < this.total_pages;
     this.has_previous = page > 1;
   }
-=======
-=======
->>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
-export class PaginationMetaDto {
-  total: number;
-  limit: number;
-  page: number;
-  total_pages: number;
-  has_next: boolean;
-  has_previous: boolean;
-<<<<<<< HEAD
->>>>>>> 5b9535c (feat(gateway:template): create Template module and restructure DTOs)
-=======
->>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
 }
