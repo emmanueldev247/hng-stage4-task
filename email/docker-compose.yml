@@ -11,9 +11,6 @@ services:
     depends_on:
       - rabbitmq
       - redis
-    volumes:
-      - .:/app
-      - /app/node_modules
 
   rabbitmq:
     image: rabbitmq:3-management

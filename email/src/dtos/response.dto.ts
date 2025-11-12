@@ -1,4 +1,3 @@
-// src/dtos/response.dto.ts
 export interface PaginationMeta {
   total: number;
   limit: number;
