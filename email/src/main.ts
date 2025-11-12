@@ -1,4 +1,3 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { EmailModule } from './email.module';
@@ -10,12 +9,11 @@ async function bootstrap() {
   const app = await NestFactory.create(EmailModule);
   const configService = app.get(ConfigService);
 
-  const rabbitmqUrl = configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672';
-  
+  // RabbitMQ Microservice Configuration
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [rabbitmqUrl],
+      urls: [configService.get('RABBITMQ_URL') || 'amqp://localhost:5672'],
       queue: 'email.queue',
       queueOptions: {
         durable: true,
@@ -23,12 +21,6 @@ async function bootstrap() {
         deadLetterRoutingKey: 'failed.queue',
       },
       noAck: false,
-      // Add these options for better pattern matching
-      prefetchCount: 1,
-      socketOptions: {
-        heartbeatIntervalInSeconds: 60,
-        reconnectTimeInSeconds: 5,
-      },
     },
   });
 
@@ -47,10 +39,13 @@ async function bootstrap() {
     transform: true,
   }));
 
+  // Start microservice before HTTP server
   await app.startAllMicroservices();
   await app.listen(3001);
   
-  console.log('Email Service is running on port 3001');
-  console.log('Swagger documentation available at http://localhost:3001/api');
+  console.log('🚀 Email Service is running on port 3001');
+  console.log('📚 API Documentation: http://localhost:3001/api');
+  console.log('✅ Microservice started - listening for RabbitMQ messages');
 }
+
 bootstrap();
