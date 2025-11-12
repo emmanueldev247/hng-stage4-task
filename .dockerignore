@@ -1,0 +1,23 @@
+# dependencies
+node_modules
+.pnpm-store
+.pnp.*
+**/node_modules
+**/.turbo
+
+# build output
+dist
+build
+.cache
+.next
+out
+
+# vcs / env / editor
+.git
+.gitignore
+.env*
+Dockerfile.*
+docker-compose*
+.vscode
+.idea
+.DS_Store

@@ -1,0 +1,11 @@
+[build]
+builder = "docker"
+dockerfilePath = "Dockerfile"
+
+[build.args]
+SVC = "gateway"
+PORT=3000
+
+[deploy]
+healthcheckPath = "/health"
+restartPolicyType = "ON_FAILURE"
