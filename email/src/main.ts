@@ -43,8 +43,8 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(process.env.PORT ?? 3003);
   
-  console.log('🚀 Email Service is running on port 3001');
-  console.log('📚 API Documentation: http://localhost:3001/api');
+  console.log('🚀 Email Service is running on port 3003');
+  console.log('📚 API Documentation: http://localhost:3003/api');
   console.log('✅ Microservice started - listening for RabbitMQ messages');
 }
 
