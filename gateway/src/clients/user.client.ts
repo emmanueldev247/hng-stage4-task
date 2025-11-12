@@ -124,7 +124,7 @@ export class UserClient {
       url: `/users/${userId}/device_tokens`,
       data: { token },
     });
-    return { success: true };
+    return { success: true, message: 'Device token added successfully' };
   }
 
   async removeToken(userId: string, token: string) {
@@ -132,7 +132,7 @@ export class UserClient {
       method: 'DELETE',
       url: `/users/${userId}/device_tokens/${token}`,
     });
-    return { success: true };
+    return { success: true, message: 'Device token removed successfully' };
   }
 
   private mapAxiosError(error: AxiosError) {

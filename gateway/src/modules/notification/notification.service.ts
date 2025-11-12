@@ -83,7 +83,6 @@ export class NotificationService {
     }
     return {
       success: true,
-      data: { status: 'Notification sent' },
       message: 'Notification dispatched successfully',
     };
   }
