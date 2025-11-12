@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { AuthResponseDto, LoginDto, RegisterDto } from '../dto';
 import { UserClient } from 'src/clients';
-import { UserDto } from 'src/common/dto';
+import { UserDto } from 'src/modules/user/dto';
 
 @Injectable()
 export class AuthService {

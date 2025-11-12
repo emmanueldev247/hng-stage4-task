@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { randomUUID } from 'node:crypto';
 import { NotificationDto } from './dto/notification.dto';
 import { TemplateClient, UserClient } from 'src/clients';
-import { TemplateDto } from 'src/common/dto';
+import { TemplateDto } from 'src/modules/template/dto';
 
 @Injectable()
 export class NotificationService {
