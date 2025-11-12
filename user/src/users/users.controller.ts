@@ -100,4 +100,12 @@ export class UsersController {
       message: `User with id ${id} successfully deleted`,
     };
   }
+  @Get('health')
+  healthCheck() {
+    return {
+      success: true,
+      message: 'User service is running and healthy',
+      status: 'ok',
+    };
+  }
 }
