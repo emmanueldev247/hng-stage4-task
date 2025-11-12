@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from './cache/cache.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -10,8 +10,8 @@ import { CacheModule } from './cache/cache.module';
       isGlobal: true,
     }),
     CacheModule,
+    NotificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
