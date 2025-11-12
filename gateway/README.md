@@ -442,6 +442,7 @@ This project is currently UNLICENSED. Refer to the `package.json` file for more 
 ## Author Info
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 👋 **Oluwaseyi Oke**
 
 Experienced Software Developer specializing in backend development. Connect with me!
@@ -454,6 +455,8 @@ Experienced Software Developer specializing in backend development. Connect with
 
 [![Maintained by iamArvy](https://img.shields.io/badge/Maintained%20by-iamArvy-blue)](https://github.com/iamArvy)
 =======
+=======
+>>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
 👋 **Emmanuel Okwudili**
 
 Experienced Software Engineer specializing in backend development. Connect with me!
@@ -465,7 +468,10 @@ Experienced Software Engineer specializing in backend development. Connect with 
 ---
 
 [![Maintained by Emmanuel](https://img.shields.io/badge/Maintained%20by-Emmanuel-blue)](https://github.com/emmanueldev247)
+<<<<<<< HEAD
 >>>>>>> 5b9535c (feat(gateway:template): create Template module and restructure DTOs)
+=======
+>>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
 [![Made with NestJS](https://img.shields.io/badge/Made%20with-NestJS-red)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js-green?logo=node.js)](https://nodejs.org/)
