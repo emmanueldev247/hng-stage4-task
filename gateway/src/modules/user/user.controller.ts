@@ -20,8 +20,8 @@ import {
 import { UserClient } from 'src/clients';
 import { RestAuthGuard } from '../auth/guards';
 import { UserRequestInterface } from 'src/common/interfaces/user-req.interface';
-import { PatchUserDto, AddTokenDto } from './dto';
-import { StatusDto, UserDto } from 'src/common/dto';
+import { PatchUserDto, AddTokenDto, UserDto } from './dto';
+import { StatusDto } from 'src/common/dto';
 
 @ApiTags('Users')
 @UseGuards(RestAuthGuard)
