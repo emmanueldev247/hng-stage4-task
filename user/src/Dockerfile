@@ -1,3 +1,4 @@
+# This file lives at: user/src/Dockerfile
 
 # --- STAGE 1: The "Builder" ---
 # This stage builds your app
@@ -9,24 +10,26 @@ WORKDIR /app
 # Install pnpm
 RUN npm i -g pnpm
 
-# --- This is the key monorepo trick ---
+# --- Monorepo trick ---
 # We copy the *root* files needed to install dependencies
-# We go "up" one level (../) to find them
-COPY ../pnpm-lock.yaml .
-COPY ../pnpm-workspace.yaml .
-COPY ../package.json .
+# We go "up" two levels (../../) to find them
+COPY ../../pnpm-lock.yaml .
+COPY ../../pnpm-workspace.yaml .
+COPY ../../package.json .
 
-# This command installs ALL dependencies for the *entire* monorepo
+# Install ALL dependencies for the *entire* monorepo
 RUN pnpm install --frozen-lockfile
 
+# --- This is the NEW part ---
 # Now, copy the *source code* for *this* service
-# (We copy it into a folder named 'user-service' inside the container)
-COPY . ./user-service/
+# The 'Dockerfile' is in 'src', so we go up one level
+# and copy the *whole* 'user' folder
+COPY .. ./user/
 
 # Change the work directory to our service
-WORKDIR /app/user-service
+WORKDIR /app/user
 
-# Build this service
+# Build this service (it will read tsconfig.json and build)
 RUN pnpm build
 
 # --- STAGE 2: The "Runner" ---
@@ -44,18 +47,19 @@ COPY --from=builder /app/pnpm-lock.yaml .
 COPY --from=builder /app/pnpm-workspace.yaml .
 
 # Copy this service's package.json
-COPY --from=builder /app/user-service/package.json ./user-service/
+COPY --from=builder /app/user/package.json ./user/
 
-# Install *only* production dependencies (no dev tools)
-RUN pnpm install --prod --filter user-service
+# Install *only* production dependencies
+RUN pnpm install --prod --filter user
 
 # Copy your built code from the builder stage
-COPY --from=builder /app/user-service/dist ./user-service/dist
+# The built code is at /app/user/dist
+COPY --from=builder /app/user/dist ./user/dist
 
 # Change the work directory to our service
-WORKDIR /app/user-service
+WORKDIR /app/user
 
-# Expose the port
+# Expose the port your app runs on
 EXPOSE 3000
 
 # The command to run your app
