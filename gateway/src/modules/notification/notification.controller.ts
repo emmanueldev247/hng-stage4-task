@@ -34,8 +34,8 @@ export class NotificationController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   sendNotification(
     @Body() notificationDto: NotificationDto,
-    @Req() { user_id }: UserRequestInterface,
+    @Req() { user }: UserRequestInterface,
   ) {
-    return this.notificationService.sendNotification(user_id, notificationDto);
+    return this.notificationService.sendNotification(user.id, notificationDto);
   }
 }

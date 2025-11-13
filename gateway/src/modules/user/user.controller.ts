@@ -16,45 +16,52 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { UserClient } from 'src/clients';
 import { RestAuthGuard } from '../auth/guards';
 import { UserRequestInterface } from 'src/common/interfaces/user-req.interface';
-import { PatchUserDto, AddTokenDto, UserDto } from './dto';
+import { DeviceTokenDto, PatchUserDto, UserDto } from './dto';
 import { StatusDto } from 'src/common/dto';
 
 @ApiTags('Users')
-@UseGuards(RestAuthGuard)
-@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private readonly userClient: UserClient) {}
 
+  @UseGuards(RestAuthGuard)
+  @ApiBearerAuth()
   @Patch('update')
   @ApiOperation({ summary: 'Update authenticated user details' })
   @ApiBody({ type: PatchUserDto })
   @ApiOkResponse({ description: 'User updated successfully', type: UserDto })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  patch(@Req() { user_id }: UserRequestInterface, @Body() data: PatchUserDto) {
-    return this.userClient.updateUser(user_id, data);
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  patch(@Req() { user }: UserRequestInterface, @Body() data: PatchUserDto) {
+    return this.userClient.updateUser(user.id, data);
   }
 
-  @Post('device_tokens')
+  @UseGuards(RestAuthGuard)
+  @ApiBearerAuth()
+  @Post('devices')
   @ApiOperation({ summary: 'Add a new device token for push notifications' })
-  @ApiBody({ type: AddTokenDto })
+  @ApiBody({ type: DeviceTokenDto })
   @ApiOkResponse({
     description: 'Device token added successfully',
     type: StatusDto,
   })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiBadRequestResponse({ description: 'Bad request' })
   addToken(
-    @Req() { user_id }: UserRequestInterface,
-    @Body() data: AddTokenDto,
+    @Req() { user }: UserRequestInterface,
+    @Body() data: DeviceTokenDto,
   ) {
-    return this.userClient.addToken(user_id, data.token);
+    return this.userClient.addToken(user.id, data.device_token);
   }
 
-  @Delete('device_tokens/:token')
+  @Delete('devices')
   @ApiOperation({ summary: 'Remove a device token for push notifications' })
   @ApiParam({
     name: 'token',
@@ -66,9 +73,9 @@ export class UserController {
     type: StatusDto,
   })
   removeToken(
-    @Req() { user_id }: UserRequestInterface,
+    @Req() { user }: UserRequestInterface,
     @Param('token') token: string,
   ) {
-    return this.userClient.removeToken(user_id, token);
+    return this.userClient.removeToken(user.id, token);
   }
 }

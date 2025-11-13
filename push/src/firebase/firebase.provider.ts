@@ -2,22 +2,60 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 
+interface FirebaseServiceAccount {
+  project_id: string;
+  private_key: string;
+  client_email: string;
+}
+
 @Injectable()
 export class FirebaseService implements OnModuleInit {
   private readonly logger = new Logger(FirebaseService.name);
   constructor(private config: ConfigService) {}
 
   onModuleInit() {
-    if (admin.apps.length === 0) {
-      const serviceAccountPath =
-        this.config.get<string>('FIREBASE_CREDENTIALS_PATH') ||
-        'src/firebase/firebase-service-account.json';
+    try {
+      if (admin.apps.length > 0) {
+        this.logger.log('Firebase Admin already initialized');
+        return;
+      }
+      const rawConfig = this.config.get<string>('FIREBASE_SERVICE_ACCOUNT');
+
+      if (!rawConfig) {
+        throw new Error(
+          'Missing FIREBASE_SERVICE_ACCOUNT in environment variables',
+        );
+      }
+
+      const firebaseConfig = JSON.parse(rawConfig) as FirebaseServiceAccount;
+
+      if (!firebaseConfig) {
+        this.logger.warn(
+          'FIREBASE_SERVICE_ACCOUNT not found — skipping Firebase initialization.',
+        );
+        return;
+      }
+
+      if (
+        !firebaseConfig.project_id ||
+        !firebaseConfig.private_key ||
+        !firebaseConfig.client_email
+      ) {
+        this.logger.error(
+          'Invalid FIREBASE_SERVICE_ACCOUNT format — missing required fields.',
+        );
+        return;
+      }
 
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountPath),
+        credential: admin.credential.cert(
+          firebaseConfig as admin.ServiceAccount,
+        ),
       });
 
-      this.logger.log('Firebase Admin initialized');
+      this.logger.log('✅ Firebase Admin initialized successfully');
+    } catch (error) {
+      this.logger.error(`Firebase initialization failed: ${error}`);
     }
   }
 

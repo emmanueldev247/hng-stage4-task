@@ -60,11 +60,11 @@ export class NotificationService {
   async sendNotification(user_id: string, data: NotificationDto) {
     const { template_code, variables } = data;
     const request_id = randomUUID();
-    const user = await this.userClient.getUserInfo(user_id);
-    const { email, preferences, device_tokens, name } = user;
+    const user = await this.userClient.getContactInfo(user_id);
+    const { email, preferences, device_tokens, name } = user.data;
     const template = await this.templateClient.getTemplate(template_code);
     const vars = { ...variables, name };
-    const { subject, body } = this.transformTemplate(template, vars);
+    const { subject, body } = this.transformTemplate(template.data, vars);
     if (preferences.email_notifications) {
       this.client.emit('notifications.email', {
         request_id,

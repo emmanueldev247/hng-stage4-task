@@ -139,7 +139,7 @@ export class TemplatesController {
    * DELETE /api/v1/templates/:id
    * Hard delete of that specific row (does not touch other versions).
    */
-  @Delete('/:id')
+  @Delete(':id')
   @ApiOperation({ summary: 'Delete a template by id - Admin only' })
   @ApiParam({ name: 'id', description: 'Template UUID' })
   @ApiOkResponse({

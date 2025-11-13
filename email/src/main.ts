@@ -4,6 +4,7 @@ import { EmailModule } from './email.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { requestLogger } from './middleware/request-logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(EmailModule);
@@ -24,6 +25,8 @@ async function bootstrap() {
     },
   });
 
+  app.use(requestLogger);
+
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Email Service API')
@@ -41,7 +44,7 @@ async function bootstrap() {
 
   // Start microservice before HTTP server
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3003);
+  await app.listen(process.env.PORT ?? 3003, '0.0.0.0');
   
   console.log('🚀 Email Service is running on port 3003');
   console.log('📚 API Documentation: http://localhost:3003/api');

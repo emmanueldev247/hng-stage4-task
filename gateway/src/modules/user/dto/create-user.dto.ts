@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -10,24 +9,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserPreferenceDto } from './user-preference.dto';
 
-class UserPreference {
-  @IsBoolean()
-  @ApiProperty({
-    description: 'Enable email notifications for the user',
-    example: true,
-  })
-  email: boolean;
-
-  @IsBoolean()
-  @ApiProperty({
-    description: 'Enable push notifications for the user',
-    example: true,
-  })
-  push: boolean;
-}
-
-export class RegisterDto {
+export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   @ApiProperty({
@@ -54,13 +38,13 @@ export class RegisterDto {
   push_token?: string;
 
   @ValidateNested()
-  @Type(() => UserPreference)
+  @Type(() => UserPreferenceDto)
   @IsNotEmptyObject()
   @ApiProperty({
     description: 'Notification preferences for the user',
-    type: UserPreference,
+    type: UserPreferenceDto,
   })
-  preferences: UserPreference;
+  preferences: UserPreferenceDto;
 
   @IsStrongPassword()
   @IsNotEmpty()
