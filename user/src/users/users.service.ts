@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -32,6 +34,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const { email, password, name, preferences, push_token } = createUserDto;
 
+    try {
     const existingUser = await this.userRepository.findOne({ where: { email } });
     if (existingUser) {
       throw new NotFoundException('User with this email alreadya exists');
@@ -71,9 +74,22 @@ export class UsersService {
 
     // Return the user
     return newUser;
+    } catch (error) {
+      if (error.status) throw error;
+
+      if (error.code === '23505') {
+        throw new ConflictException('User with this email already exists')
+      }
+
+      console.error('Error creating user: ', error);
+      throw new InternalServerErrorException(
+        'An error occurred while creating the user'
+      );
+    }
   }
 
   async getContactInfo(id: string) {
+    try {
     // A. Find user, and 'join' related tables
     const user = await this.userRepository.findOne({
       where: { id },
@@ -96,10 +112,15 @@ export class UsersService {
         email_notifications: user.preference?.email_notifications,
         push_notifications: user.preference?.push_notifications,
       },
-    };
+    }; 
+  } catch (error) {
+    if (error.status) throw error;
+    throw new InternalServerErrorException('Could not retrieve contact info')
   }
+}
 
   async validatePassword(loginUserDto: LoginUserDto) {
+    try {
     const { email, password } = loginUserDto;
 
     // Find user
@@ -123,8 +144,13 @@ export class UsersService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...result } = user;
     return result;
-  }
+    } catch (error) {
+      if (error.status) throw error;
+      throw new InternalServerErrorException('Could not validate user');
+    }
+  } 
   async addDevice(userId: string, addDeviceDto: AddDeviceDto) {
+    try {
     // 1. Find the user
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -152,9 +178,14 @@ export class UsersService {
     });
 
     return this.deviceRepository.save(newDevice);
+    } catch (error) {
+      if (error.status) throw error;
+      throw new InternalServerErrorException('Could not add device token');
+    }
   }
 
   async removeDevice(removeDeviceDto: RemoveDeviceDto) {
+    try {
     const { device_token } = removeDeviceDto;
 
     const device = await this.deviceRepository.findOne({
@@ -170,9 +201,13 @@ export class UsersService {
 
     await this.deviceRepository.remove(device);
     return { success: true, message: 'Device token removed' };
+    } catch  (error) {
+      throw new InternalServerErrorException('Could not remove device token')
+    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
     // 1. Find user
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -195,9 +230,14 @@ export class UsersService {
     await this.userRepository.update(id, updateUserDto);
 
     return this.userRepository.findOne({ where: { id } });
+    } catch (error) {
+      if (error.status) throw error;
+      throw new InternalServerErrorException('Could not update user');
+    }
   }
 
   async remove(id: string): Promise<void> {
+    try {
     // 1. Find the user preference relation
     const user = await this.userRepository.findOne({
       where: { id },
@@ -224,5 +264,8 @@ export class UsersService {
     if (preferenceId) {
       await this.preferenceRepository.delete(preferenceId);
     }
+  } catch (error) {
+    throw new InternalServerErrorException('Could not delete user');
   }
+}
 }
