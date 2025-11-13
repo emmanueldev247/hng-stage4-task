@@ -1,8 +1,6 @@
-// src/services/sendgrid.service.ts - ALTERNATIVE VERSION
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-// Import SendGrid mail
 const SendGrid = require('@sendgrid/mail');
 
 @Injectable()
@@ -17,7 +15,9 @@ export class SendGridService {
       this.isInitialized = true;
       this.logger.log('SendGrid service initialized');
     } else {
-      this.logger.warn('SENDGRID_API_KEY not found - running in development mode');
+      this.logger.warn(
+        'SENDGRID_API_KEY not found - running in development mode',
+      );
     }
   }
 
@@ -30,12 +30,15 @@ export class SendGridService {
     if (!this.isInitialized) {
       this.logger.warn('SendGrid not initialized - simulating email send');
       this.logger.log(`Would send email to: ${to}, subject: ${subject}`);
-      return true; // Simulate success in development
+      return true;
     }
 
     try {
-      const fromEmail = from || this.configService.get<string>('SENDGRID_FROM_EMAIL') || 'noreply@example.com';
-      
+      const fromEmail =
+        from ||
+        this.configService.get<string>('SENDGRID_FROM_EMAIL') ||
+        'noreply@example.com';
+
       const msg = {
         to,
         from: fromEmail,
