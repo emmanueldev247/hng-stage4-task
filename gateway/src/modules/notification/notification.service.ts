@@ -60,7 +60,7 @@ export class NotificationService {
   async sendNotification(user_id: string, data: NotificationDto) {
     const { template_code, variables } = data;
     const request_id = randomUUID();
-    const user = await this.userClient.getUserInfo(user_id);
+    const user = await this.userClient.getContactInfo(user_id);
     const { email, preferences, device_tokens, name } = user;
     const template = await this.templateClient.getTemplate(template_code);
     const vars = { ...variables, name };
