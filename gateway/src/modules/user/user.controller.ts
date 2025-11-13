@@ -22,7 +22,7 @@ import {
 import { UserClient } from 'src/clients';
 import { RestAuthGuard } from '../auth/guards';
 import { UserRequestInterface } from 'src/common/interfaces/user-req.interface';
-import { PatchUserDto, TokenDto, UserDto } from './dto';
+import { DeviceTokenDto, PatchUserDto, UserDto } from './dto';
 import { StatusDto } from 'src/common/dto';
 
 @ApiTags('Users')
@@ -65,7 +65,7 @@ export class UserController {
   @ApiBearerAuth()
   @Post('devices')
   @ApiOperation({ summary: 'Add a new device token for push notifications' })
-  @ApiBody({ type: TokenDto })
+  @ApiBody({ type: DeviceTokenDto })
   @ApiOkResponse({
     description: 'Device token added successfully',
     type: StatusDto,
@@ -74,7 +74,10 @@ export class UserController {
     description: 'Invalid or missing authentication token',
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  addToken(@Req() { user_id }: UserRequestInterface, @Body() data: TokenDto) {
+  addToken(
+    @Req() { user_id }: UserRequestInterface,
+    @Body() data: DeviceTokenDto,
+  ) {
     return this.userClient.addToken(user_id, data.device_token);
   }
 
