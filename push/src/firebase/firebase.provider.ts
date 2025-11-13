@@ -2,6 +2,12 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 
+interface FirebaseServiceAccount {
+  project_id: string;
+  private_key: string;
+  client_email: string;
+}
+
 @Injectable()
 export class FirebaseService implements OnModuleInit {
   private readonly logger = new Logger(FirebaseService.name);
@@ -13,10 +19,15 @@ export class FirebaseService implements OnModuleInit {
         this.logger.log('Firebase Admin already initialized');
         return;
       }
+      const rawConfig = this.config.get<string>('FIREBASE_SERVICE_ACCOUNT');
 
-      const firebaseConfig = this.config.get<Record<string, any>>(
-        'FIREBASE_SERVICE_ACCOUNT',
-      );
+      if (!rawConfig) {
+        throw new Error(
+          'Missing FIREBASE_SERVICE_ACCOUNT in environment variables',
+        );
+      }
+
+      const firebaseConfig = JSON.parse(rawConfig) as FirebaseServiceAccount;
 
       if (!firebaseConfig) {
         this.logger.warn(
