@@ -14,9 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate({ sub: user_id }: { sub: string }) {
+  validate({ sub: id }: { sub: string }) {
     return {
-      user_id,
+      id,
     };
   }
 }

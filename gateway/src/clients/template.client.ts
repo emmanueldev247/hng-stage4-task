@@ -9,10 +9,14 @@ import {
   TemplateListQueryDto,
 } from 'src/modules/template/dto';
 import { BaseHttpClient } from './base-http.client';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class TemplateClient extends BaseHttpClient {
-  constructor(config: ConfigService) {
+  constructor(
+    config: ConfigService,
+    private readonly cache: CacheService,
+  ) {
     super(config, 'Template', 'TEMPLATE_SERVICE_URL');
   }
   async createTemplate(body: CreateTemplateDto): Promise<TemplateResponseDto> {

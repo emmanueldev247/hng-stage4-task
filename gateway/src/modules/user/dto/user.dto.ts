@@ -1,3 +1,4 @@
+import { UserResponse } from './user-response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserDto {
@@ -5,7 +6,7 @@ export class UserDto {
     description: 'Unique identifier of the user',
     example: 'c3f23a42-9e32-4f02-96a8-b4f1a5a3f6a2',
   })
-  id: string;
+  user_id: string;
 
   @ApiProperty({
     description: 'Email address of the user',
@@ -34,4 +35,8 @@ export class UserDto {
     format: 'date-time',
   })
   updated_at: string;
+}
+
+export class UserResponseDto extends UserResponse {
+  data: UserDto;
 }
