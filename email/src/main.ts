@@ -4,6 +4,7 @@ import { EmailModule } from './email.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { requestLogger } from './middleware/request-logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(EmailModule);
@@ -23,6 +24,8 @@ async function bootstrap() {
       noAck: false,
     },
   });
+
+  app.use(requestLogger);
 
   // Swagger configuration
   const config = new DocumentBuilder()
