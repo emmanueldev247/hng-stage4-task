@@ -1,7 +1,8 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { requestLogger } from "./middleware/request-logger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,20 +12,22 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // Strip away properties that are not in the DTO
       forbidNonWhitelisted: true, // Throw error if unknown properties are sent
-    }),
+    })
   );
 
+  app.use(requestLogger);
+
   const config = new DocumentBuilder()
-  .setTitle('User Service API')
-  .setDescription('API documentation for the HNG Stage 4 User Service')
-  .setVersion('1.0')
-  .build();
+    .setTitle("User Service API")
+    .setDescription("API documentation for the HNG Stage 4 User Service")
+    .setVersion("1.0")
+    .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-  
-  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  SwaggerModule.setup("api/docs", app, document);
+
+  await app.listen(process.env.PORT ?? 3001, "0.0.0.0");
 }
 bootstrap().catch((err) => {
-  console.error('Bootstrap failed:', err);
+  console.error("Bootstrap failed:", err);
   process.exit(1); // Exit  process if startup fails
 });

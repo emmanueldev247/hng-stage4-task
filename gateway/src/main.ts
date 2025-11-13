@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { requestLogger } from './middleware/request-logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  
+  app.use(requestLogger);
+
   const config = new DocumentBuilder()
     .setTitle('Notification Application')
     .setDescription('Notification Application API Documentation')
