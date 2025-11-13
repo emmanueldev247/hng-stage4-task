@@ -13,6 +13,7 @@ import {
 } from 'src/modules/template/dto';
 import { BaseHttpClient } from './base-http.client';
 import { CacheService } from 'src/cache/cache.service';
+import { StatusDto } from 'src/common/dto';
 
 @Injectable()
 export class TemplateClient extends BaseHttpClient {
@@ -24,8 +25,15 @@ export class TemplateClient extends BaseHttpClient {
   }
   private adminKey = this.config.get<string>('TEMPLATE_ADMIN_API_KEY');
 
-  async createTemplate(body: CreateTemplateDto): Promise<TemplateResponseDto> {
-    const response = await this.request<TemplateResponseDto>({
+  getHealth(): Promise<StatusDto> {
+    return this.request<StatusDto>({
+      method: 'GET',
+      url: '/health',
+    });
+  }
+
+  createTemplate(body: CreateTemplateDto): Promise<TemplateResponseDto> {
+    return this.request<TemplateResponseDto>({
       method: 'POST',
       url: '/templates/',
       data: body,
@@ -33,46 +41,42 @@ export class TemplateClient extends BaseHttpClient {
         'x-api-key': this.adminKey,
       },
     });
-    return response;
   }
 
   @Cached('15m', (code: string) => CacheKeys.template(code))
-  async getTemplate(code: string): Promise<TemplateResponseDto> {
-    const response = await this.request<TemplateResponseDto>({
+  getTemplate(code: string): Promise<TemplateResponseDto> {
+    return this.request<TemplateResponseDto>({
       method: 'GET',
       url: '/templates',
       params: {
         template_code: code,
       },
     });
-    return response;
   }
 
   @Cached('15m', (id: string) => CacheKeys.template(id))
-  async getTemplateById(id: string): Promise<TemplateResponseDto> {
-    const response = await this.request<TemplateResponseDto>({
+  getTemplateById(id: string): Promise<TemplateResponseDto> {
+    return this.request<TemplateResponseDto>({
       method: 'GET',
       url: `/templates/${id}`,
     });
-    return response;
   }
 
   async listTemplates(
     query: TemplateListQueryDto,
   ): Promise<TemplateListResponseDto> {
-    const response = await this.request<TemplateListResponseDto>({
+    return this.request<TemplateListResponseDto>({
       method: 'GET',
       url: '/templates/list',
       params: query,
     });
-    return response;
   }
 
-  async patchTemplate(
+  patchTemplate(
     id: string,
     body: PatchTemplateDto,
   ): Promise<TemplateResponseDto> {
-    const response = await this.request<TemplateResponseDto>({
+    return this.request<TemplateResponseDto>({
       method: 'PATCH',
       url: `/templates/${id}`,
       data: body,
@@ -80,11 +84,10 @@ export class TemplateClient extends BaseHttpClient {
         'x-api-key': this.adminKey,
       },
     });
-    return response;
   }
 
-  async deleteTemplate(id: string): Promise<void> {
-    await this.request({
+  deleteTemplate(id: string): Promise<void> {
+    return this.request({
       method: 'DELETE',
       url: `/templates/${id}`,
       headers: {
