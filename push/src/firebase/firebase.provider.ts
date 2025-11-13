@@ -8,16 +8,43 @@ export class FirebaseService implements OnModuleInit {
   constructor(private config: ConfigService) {}
 
   onModuleInit() {
-    if (admin.apps.length === 0) {
-      const serviceAccountPath =
-        this.config.get<string>('FIREBASE_CREDENTIALS_PATH') ||
-        'src/firebase/firebase-service-account.json';
+    try {
+      if (admin.apps.length > 0) {
+        this.logger.log('Firebase Admin already initialized');
+        return;
+      }
+
+      const firebaseConfig = this.config.get<Record<string, any>>(
+        'FIREBASE_SERVICE_ACCOUNT',
+      );
+
+      if (!firebaseConfig) {
+        this.logger.warn(
+          'FIREBASE_SERVICE_ACCOUNT not found — skipping Firebase initialization.',
+        );
+        return;
+      }
+
+      if (
+        !firebaseConfig.project_id ||
+        !firebaseConfig.private_key ||
+        !firebaseConfig.client_email
+      ) {
+        this.logger.error(
+          'Invalid FIREBASE_SERVICE_ACCOUNT format — missing required fields.',
+        );
+        return;
+      }
 
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountPath),
+        credential: admin.credential.cert(
+          firebaseConfig as admin.ServiceAccount,
+        ),
       });
 
-      this.logger.log('Firebase Admin initialized');
+      this.logger.log('✅ Firebase Admin initialized successfully');
+    } catch (error) {
+      this.logger.error(`Firebase initialization failed: ${error}`);
     }
   }
 
