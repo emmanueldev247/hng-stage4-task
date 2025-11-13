@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { requestLogger } from './middleware/request-logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -13,6 +16,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.use(requestLogger);
 
   // Swagger setup
   const config = new DocumentBuilder()
@@ -26,6 +30,8 @@ async function bootstrap() {
     jsonDocumentUrl: '/api/docs-json',
   });
 
-  await app.listen(process.env.PORT ?? 3002, '0.0.0.0');
+  const port = process.env.PORT ?? 3002;
+  console.log(`Listening on port ${port}`);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();

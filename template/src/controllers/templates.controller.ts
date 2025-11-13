@@ -151,7 +151,7 @@ export class TemplatesController {
    * GET /api/v1/templates?template_code=welcome_v2
    * Returns the latest (highest version) by code.
    */
-  @Get('/')
+  @Get('')
   @ApiOperation({ summary: 'Get latest template by template_code' })
   @ApiQuery({ name: 'template_code', required: true })
   @ApiOkResponse({
