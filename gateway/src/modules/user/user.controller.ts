@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Param,
   Patch,
   Post,
@@ -30,25 +29,6 @@ import { StatusDto } from 'src/common/dto';
 export class UserController {
   constructor(private readonly userClient: UserClient) {}
 
-  @Get('me')
-  @ApiOperation({
-    summary: 'Get the currently authenticated user',
-    description:
-      'Returns profile information (email, name, preferences, and device tokens) for the logged-in user.',
-  })
-  @ApiOkResponse({
-    description: 'Authenticated user profile retrieved successfully',
-    type: UserDto,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Invalid or missing authentication token',
-  })
-  @UseGuards(RestAuthGuard)
-  @ApiBearerAuth()
-  async user(@Req() { user_id }: UserRequestInterface) {
-    return this.userClient.getUserInfo(user_id);
-  }
-
   @UseGuards(RestAuthGuard)
   @ApiBearerAuth()
   @Patch('update')
@@ -57,8 +37,8 @@ export class UserController {
   @ApiOkResponse({ description: 'User updated successfully', type: UserDto })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  patch(@Req() { user_id }: UserRequestInterface, @Body() data: PatchUserDto) {
-    return this.userClient.updateUser(user_id, data);
+  patch(@Req() { user }: UserRequestInterface, @Body() data: PatchUserDto) {
+    return this.userClient.updateUser(user.id, data);
   }
 
   @UseGuards(RestAuthGuard)
@@ -75,10 +55,10 @@ export class UserController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   addToken(
-    @Req() { user_id }: UserRequestInterface,
+    @Req() { user }: UserRequestInterface,
     @Body() data: DeviceTokenDto,
   ) {
-    return this.userClient.addToken(user_id, data.device_token);
+    return this.userClient.addToken(user.id, data.device_token);
   }
 
   @Delete('devices')
@@ -93,9 +73,9 @@ export class UserController {
     type: StatusDto,
   })
   removeToken(
-    @Req() { user_id }: UserRequestInterface,
+    @Req() { user }: UserRequestInterface,
     @Param('token') token: string,
   ) {
-    return this.userClient.removeToken(user_id, token);
+    return this.userClient.removeToken(user.id, token);
   }
 }

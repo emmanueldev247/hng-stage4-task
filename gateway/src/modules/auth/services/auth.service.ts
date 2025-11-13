@@ -12,7 +12,7 @@ export class AuthService {
   ) {}
 
   private async issueTokens(user: UserDto): Promise<AuthResponseDto> {
-    const access = await this.token.access(user.id);
+    const access = await this.token.access(user.user_id);
     return {
       access,
       user,
@@ -22,7 +22,7 @@ export class AuthService {
   async signup(data: CreateUserDto): Promise<AuthResponseDto> {
     if (!data) throw new BadRequestException('Invalid credentials');
     const user = await this.userClient.createUser(data);
-    return this.issueTokens(user);
+    return this.issueTokens(user.data);
   }
 
   async login(data: LoginDto): Promise<AuthResponseDto> {
@@ -31,6 +31,6 @@ export class AuthService {
       data.email,
       data.password,
     );
-    return this.issueTokens(user);
+    return this.issueTokens(user.data);
   }
 }

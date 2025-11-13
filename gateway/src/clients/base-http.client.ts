@@ -82,17 +82,8 @@ export abstract class BaseHttpClient {
         `${this.serviceName} service not configured`,
       );
     }
-    try {
-      const response = (await this.breaker.fire(config)) as AxiosResponse<T>;
-      return response.data;
-    } catch (error: any) {
-      this.logger.error(
-        `[${this.serviceName}] Request to ${config.url} failed: ${error}`,
-      );
-      throw new ServiceUnavailableException(
-        `${this.serviceName} service currently unavailable`,
-      );
-    }
+    const response = (await this.breaker.fire(config)) as AxiosResponse<T>;
+    return response.data;
   }
 
   private mapAxiosError(error: AxiosError): never {

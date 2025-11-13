@@ -61,7 +61,7 @@ export class NotificationService {
     const { template_code, variables } = data;
     const request_id = randomUUID();
     const user = await this.userClient.getContactInfo(user_id);
-    const { email, preferences, device_tokens, name } = user;
+    const { email, preferences, device_tokens, name } = user.data;
     const template = await this.templateClient.getTemplate(template_code);
     const vars = { ...variables, name };
     const { subject, body } = this.transformTemplate(template, vars);
