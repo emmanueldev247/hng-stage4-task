@@ -26,6 +26,6 @@ async function bootstrap() {
     jsonDocumentUrl: '/api/docs-json',
   });
 
-  await app.listen(process.env.PORT ?? 3002);
+  await app.listen(process.env.PORT ?? 3002, '0.0.0.0');
 }
 bootstrap();
