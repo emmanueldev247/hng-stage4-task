@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtStrategy } from './modules/auth/strategies';
@@ -7,6 +6,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from './cache/cache.module';
 import { UserModule } from './modules/user/user.module';
 import { TemplateModule } from './modules/template/template.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -18,8 +18,8 @@ import { TemplateModule } from './modules/template/template.module';
     CacheModule,
     UserModule,
     TemplateModule,
+    HealthModule,
   ],
-  controllers: [AppController],
   providers: [JwtStrategy],
 })
 export class AppModule {}

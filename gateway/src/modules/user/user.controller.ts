@@ -1,20 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -59,23 +49,5 @@ export class UserController {
     @Body() data: DeviceTokenDto,
   ) {
     return this.userClient.addToken(user.id, data.device_token);
-  }
-
-  @Delete('devices')
-  @ApiOperation({ summary: 'Remove a device token for push notifications' })
-  @ApiParam({
-    name: 'token',
-    description: 'Device token to remove',
-    example: 'faketoken123',
-  })
-  @ApiOkResponse({
-    description: 'Device token removed successfully',
-    type: StatusDto,
-  })
-  removeToken(
-    @Req() { user }: UserRequestInterface,
-    @Param('token') token: string,
-  ) {
-    return this.userClient.removeToken(user.id, token);
   }
 }
