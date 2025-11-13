@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   ServiceUnavailableException,
@@ -29,15 +28,15 @@ export abstract class BaseHttpClient {
     protected readonly serviceName: string,
     protected readonly baseUrlKey: string,
   ) {
+    this.logger = new Logger(`${serviceName}Client`);
+
     const baseURL = this.config.get<string>(this.baseUrlKey);
     if (!baseURL) {
-      throw new InternalServerErrorException(
-        `${this.baseUrlKey} is not defined`,
+      this.logger.warn(
+        `[${this.serviceName}] Base URL key "${this.baseUrlKey}" is not defined. Requests may fail.`,
       );
     }
-
-    this.logger = new Logger(`${serviceName}Client`);
-    this.axiosClient = axios.create({ baseURL, timeout: 5000 });
+    this.axiosClient = axios.create({ baseURL: baseURL ?? '', timeout: 5000 });
 
     // Retry policy
     axiosRetry(this.axiosClient, {
@@ -78,6 +77,11 @@ export abstract class BaseHttpClient {
   }
 
   protected async request<T>(config: AxiosRequestConfig): Promise<T> {
+    if (!this.axiosClient.defaults.baseURL) {
+      throw new ServiceUnavailableException(
+        `${this.serviceName} service not configured`,
+      );
+    }
     try {
       const response = (await this.breaker.fire(config)) as AxiosResponse<T>;
       return response.data;

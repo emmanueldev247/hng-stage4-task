@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -16,45 +17,68 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { UserClient } from 'src/clients';
 import { RestAuthGuard } from '../auth/guards';
 import { UserRequestInterface } from 'src/common/interfaces/user-req.interface';
-import { PatchUserDto, AddTokenDto, UserDto } from './dto';
+import { PatchUserDto, TokenDto, UserDto } from './dto';
 import { StatusDto } from 'src/common/dto';
 
 @ApiTags('Users')
-@UseGuards(RestAuthGuard)
-@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private readonly userClient: UserClient) {}
 
+  @Get('me')
+  @ApiOperation({
+    summary: 'Get the currently authenticated user',
+    description:
+      'Returns profile information (email, name, preferences, and device tokens) for the logged-in user.',
+  })
+  @ApiOkResponse({
+    description: 'Authenticated user profile retrieved successfully',
+    type: UserDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
+  @UseGuards(RestAuthGuard)
+  @ApiBearerAuth()
+  async user(@Req() { user_id }: UserRequestInterface) {
+    return this.userClient.getUserInfo(user_id);
+  }
+
+  @UseGuards(RestAuthGuard)
+  @ApiBearerAuth()
   @Patch('update')
   @ApiOperation({ summary: 'Update authenticated user details' })
   @ApiBody({ type: PatchUserDto })
   @ApiOkResponse({ description: 'User updated successfully', type: UserDto })
   @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   patch(@Req() { user_id }: UserRequestInterface, @Body() data: PatchUserDto) {
     return this.userClient.updateUser(user_id, data);
   }
 
-  @Post('device_tokens')
+  @UseGuards(RestAuthGuard)
+  @ApiBearerAuth()
+  @Post('devices')
   @ApiOperation({ summary: 'Add a new device token for push notifications' })
-  @ApiBody({ type: AddTokenDto })
+  @ApiBody({ type: TokenDto })
   @ApiOkResponse({
     description: 'Device token added successfully',
     type: StatusDto,
   })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing authentication token',
+  })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  addToken(
-    @Req() { user_id }: UserRequestInterface,
-    @Body() data: AddTokenDto,
-  ) {
-    return this.userClient.addToken(user_id, data.token);
+  addToken(@Req() { user_id }: UserRequestInterface, @Body() data: TokenDto) {
+    return this.userClient.addToken(user_id, data.device_token);
   }
 
-  @Delete('device_tokens/:token')
+  @Delete('devices')
   @ApiOperation({ summary: 'Remove a device token for push notifications' })
   @ApiParam({
     name: 'token',
