@@ -24,7 +24,7 @@ export class UserClient extends BaseHttpClient {
   getHealth(): Promise<StatusDto> {
     return this.request<StatusDto>({
       method: 'GET',
-      url: '/users/health',
+      url: '/health',
     });
   }
 
