@@ -1,27 +1,29 @@
 # Gateway API
 
 ## Overview
-The Gateway API is a robust NestJS application built with TypeScript, serving as a central entry point for various microservices. It orchestrates user authentication, manages notification dispatch through RabbitMQ, and leverages Redis for efficient caching, while ensuring resilient communication with downstream services via circuit breakers.
+This project is a TypeScript Node.js API Gateway built with NestJS. It acts as a central entry point, routing requests to various internal microservices (User Service, Template Service), handling user authentication, and dispatching notifications through RabbitMQ. It leverages Redis for caching frequently accessed data and incorporates circuit breaker patterns for enhanced resilience.
 
 ## Features
--   `NestJS`: Provides a modular and scalable architecture for the API gateway.
--   `TypeScript`: Enhances code quality and maintainability through strong typing.
--   `JWT Authentication`: Secures API endpoints, handling user authentication and authorization flows.
--   `RabbitMQ (Microservices)`: Facilitates asynchronous and reliable communication for notification dispatch.
--   `Redis (Cacheable)`: Implements a distributed cache for frequently accessed user and template data, significantly improving response times.
--   `Axios & Axios-Retry`: Manages external HTTP requests to User and Template microservices, incorporating automatic retry logic for transient failures.
--   `Opossum (Circuit Breaker)`: Integrates circuit breaker patterns to enhance system resilience and prevent cascading failures across microservices.
--   `Swagger/OpenAPI`: Automatically generates interactive API documentation for comprehensive endpoint exploration.
+-   **NestJS Framework**: Provides a robust, scalable, and maintainable application structure.
+-   **API Gateway Pattern**: Centralizes access to multiple downstream microservices.
+-   **User Authentication**: Implements JWT-based authentication for securing API endpoints.
+-   **User Management**: Integrates with a dedicated User Service for user registration, login, and profile updates.
+-   **Template Management**: Interacts with a Template Service for creating, retrieving, and managing notification templates.
+-   **Notification Dispatch**: Publishes messages to RabbitMQ queues for asynchronous notification processing (email, push).
+-   **Caching (Redis)**: Improves performance and reduces load on downstream services using a custom caching decorator and Redis.
+-   **Circuit Breaker (Opossum)**: Enhances system resilience by preventing cascading failures to unhealthy microservices.
+-   **Request Validation**: Utilizes `class-validator` and `ValidationPipe` for robust input validation.
+-   **Swagger API Documentation**: Automatically generates and serves interactive API documentation.
+-   **Microservice Communication**: Achieves inter-service communication via HTTP clients and RabbitMQ.
 
 ## Getting Started
 ### Installation
-
 To set up the project locally, follow these steps:
 
 1.  **Clone the Repository**:
     ```bash
     git clone https://github.com/emmanueldev247/hng-stage4-task.git
-    cd gateway
+    cd hng-stage4-task
     ```
 
 2.  **Install Dependencies**:
@@ -34,48 +36,68 @@ To set up the project locally, follow these steps:
     npm run build
     ```
 
-4.  **Run the Application**:
-    -   **Development Mode**: The application will restart on file changes.
-        ```bash
-        npm run start:dev
-        ```
-    -   **Production Mode**:
-        ```bash
-        npm run start:prod
-        ```
+4.  **Start the Application**:
+    ```bash
+    npm run start:prod
+    ```
+    For development with hot-reloading:
+    ```bash
+    npm run start:dev
+    ```
 
 ### Environment Variables
-The following environment variables are required to run the application. Create a `.env` file in the project root based on `.env.example`:
+The following environment variables are required to run the application. Create a `.env` file in the project root based on `.env.example`.
 
--   `USER_SERVICE_URL`: URL for the User microservice (e.g., `http://localhost:3001/api/v1`)
--   `TEMPLATE_SERVICE_URL`: URL for the Template microservice (e.g., `http://localhost:3002/api/v1`)
--   `RABBITMQ_URL`: Connection URL for RabbitMQ (e.g., `amqp://localhost:5672`)
--   `REDIS_URL`: Connection URL for Redis (e.g., `redis://localhost:6379`)
--   `JWT_SECRET`: Secret key for JWT token signing (e.g., `yourSuperSecretJWTKey`)
--   `PORT`: Port on which the API Gateway will listen (e.g., `3000`)
+-   `USER_SERVICE_URL`: The base URL for the User microservice.
+    *Example*: `http://localhost:3001`
+-   `TEMPLATE_SERVICE_URL`: The base URL for the Template microservice.
+    *Example*: `http://localhost:3002`
+-   `RABBITMQ_URL`: The connection string for the RabbitMQ server.
+    *Example*: `amqp://localhost:5672`
+-   `REDIS_URL`: The connection string for the Redis server used for caching.
+    *Example*: `redis://localhost:6379`
+-   `JWT_SECRET`: A secret key for signing and verifying JWT tokens.
+    *Example*: `yourStrongJwtSecretKey`
+-   `PORT`: The port on which the API Gateway will listen.
+    *Example*: `3000`
 
 ## API Documentation
 ### Base URL
-`http://localhost:3000/api/v1` (adjust port as configured)
-Interactive Swagger UI is available at `/api/v1/docs` (e.g., `http://localhost:3000/api/v1/docs`)
+The base URL for all API endpoints (excluding `/health`) is `http://localhost:[PORT]/api/v1`.
+The interactive API documentation is available at `http://localhost:[PORT]/api/v1/docs`.
 
 ### Endpoints
+#### GET /health
+**Description**: Checks the operational status of the API Gateway.
+**Request**:
+No payload.
 
-#### `POST /auth/register`
-**Description**: Registers a new user account.
+**Response**:
+```json
+{
+  "status": "OK"
+}
+```
+
+**Errors**:
+-   `500 Internal Server Error`: An unexpected server error occurred.
+
+#### POST /api/v1/register
+**Description**: Registers a new user account within the system.
 **Request**:
 ```json
 {
-  "email": "john.doe@example.com",
-  "name": "John Doe",
-  "push_token": "faketoken123",
+  "email": "user@example.com",
+  "name": "Test User",
+  "push_token": "optionalDevicePushToken",
   "preferences": {
-    "email": true,
-    "push": true
+    "email_notifications": true,
+    "push_notifications": true
   },
-  "password": "StrongPassw0rd!"
+  "password": "StrongPassword123!"
 }
 ```
+
 **Response**:
 ```json
 {
@@ -84,32 +106,29 @@ Interactive Swagger UI is available at `/api/v1/docs` (e.g., `http://localhost:3
     "expiresIn": 900
   },
   "user": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "email": "john.doe@example.com",
-    "name": "John Doe",
-    "device_tokens": [
-      "faketoken123"
-    ],
-    "preferences": {
-      "email_notifications": true,
-      "push_notifications": true
-    }
+    "id": "c3f23a42-9e32-4f02-96a8-b4f1a5a3f6a2",
+    "email": "user@example.com",
+    "name": "Test User",
+    "created_at": "2025-11-12T20:45:31.000Z",
+    "updated_at": "2025-11-12T20:45:31.000Z"
   }
 }
 ```
-**Errors**:
--   `400 Bad Request`: Invalid input or missing fields.
--   `409 Conflict`: User with provided email already exists.
 
-#### `POST /auth/login`
-**Description**: Authenticates a user and returns an access token.
+**Errors**:
+-   `400 Bad Request`: Invalid input data (e.g., malformed email, weak password, missing required fields).
+-   `409 Conflict`: A user with the provided email already exists.
+
+#### POST /api/v1/login
+**Description**: Authenticates a user with provided credentials and returns JWT access tokens upon successful login.
 **Request**:
 ```json
 {
-  "email": "john.doe@example.com",
-  "password": "StrongPassw0rd!"
+  "email": "user@example.com",
+  "password": "StrongPassword123!"
 }
 ```
+
 **Response**:
 ```json
 {
@@ -118,36 +137,33 @@ Interactive Swagger UI is available at `/api/v1/docs` (e.g., `http://localhost:3
     "expiresIn": 900
   },
   "user": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "email": "john.doe@example.com",
-    "name": "John Doe",
-    "device_tokens": [
-      "faketoken123"
-    ],
-    "preferences": {
-      "email_notifications": true,
-      "push_notifications": true
-    }
+    "id": "c3f23a42-9e32-4f02-96a8-b4f1a5a3f6a2",
+    "email": "user@example.com",
+    "name": "Test User",
+    "created_at": "2025-11-12T20:45:31.000Z",
+    "updated_at": "2025-11-12T20:45:31.000Z"
   }
 }
 ```
-**Errors**:
--   `400 Bad Request`: Invalid input or missing fields.
--   `401 Unauthorized`: Invalid credentials.
 
-#### `POST /notifications`
-**Description**: Dispatches a notification to the authenticated user based on a template.
-**Authentication**: Bearer Token
+**Errors**:
+-   `400 Bad Request`: Invalid input (e.g., missing email or password).
+-   `401 Unauthorized`: Invalid credentials provided (incorrect email or password).
+
+#### POST /api/v1/notifications
+**Description**: Dispatches a notification to the authenticated user using a specified template and variables.
+**Authentication**: Bearer Token required.
 **Request**:
 ```json
 {
   "template_code": "welcome_email_v1",
   "variables": {
-    "name": "John Doe",
-    "link": "https://example.com/verify"
+    "name": "Jane Doe",
+    "link": "https://example.com/confirm"
   }
 }
 ```
+
 **Response**:
 ```json
 {
@@ -155,64 +171,77 @@ Interactive Swagger UI is available at `/api/v1/docs` (e.g., `http://localhost:3
   "message": "Notification dispatched successfully"
 }
 ```
-**Errors**:
--   `400 Bad Request`: Missing template code, invalid variables, or required template variables not provided.
--   `401 Unauthorized`: Invalid or missing authentication token.
--   `500 Internal Server Error`: An unexpected server error occurred.
 
-#### `POST /templates`
-**Description**: Creates a new version of a notification template.
+**Errors**:
+-   `400 Bad Request`: Invalid template code, missing required variables for the template, or invalid data in `variables`.
+-   `401 Unauthorized`: Missing or invalid authentication token.
+-   `503 Service Unavailable`: Downstream services (e.g., User Service, Template Service, RabbitMQ) are currently unreachable.
+
+#### POST /api/v1/templates
+**Description**: Creates a new version of a notification template. The system automatically handles versioning based on `template_code`.
 **Request**:
 ```json
 {
-  "template_code": "welcome_email",
-  "subject": "Welcome, {{name}}!",
-  "body": "Hi {{name}}, visit {{link}}"
+  "template_code": "new_promotion_email",
+  "subject": "Exciting Offer, {{name}}!",
+  "body": "Hello {{name}}, check out our new promotion at {{promo_link}}."
 }
 ```
+
 **Response**:
 ```json
 {
   "success": true,
   "data": {
     "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "template_code": "welcome_email",
+    "template_code": "new_promotion_email",
     "version": 1,
-    "subject": "Welcome, {{name}}!",
-    "body": "Hi {{name}}, visit {{link}}",
-    "created_at": "2023-10-26T10:00:00.000Z",
-    "updated_at": "2023-10-26T10:00:00.000Z"
+    "subject": "Exciting Offer, {{name}}!",
+    "body": "Hello {{name}}, check out our new promotion at {{promo_link}}.",
+    "created_at": "2023-10-27T10:00:00.000Z",
+    "updated_at": "2023-10-27T10:00:00.000Z"
   },
-  "message": "Template version created"
+  "message": "ok"
 }
 ```
-**Errors**:
--   `400 Bad Request`: Missing or invalid fields.
 
-#### `GET /templates`
+**Errors**:
+-   `400 Bad Request`: Missing or invalid fields in the request body.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
+
+#### GET /api/v1/templates
 **Description**: Retrieves a paginated list of all template versions, with optional filtering by `template_code`.
-**Request**:
-```
-GET /api/v1/templates?template_code=welcome_email&page=1&limit=10
-```
+**Request Query Parameters**:
+-   `template_code` (optional): Filters templates by a specific code.
+-   `page` (optional): Specifies the page number for pagination (defaults to 1).
+-   `limit` (optional): Defines the number of items per page (defaults to 10).
 **Response**:
 ```json
 {
   "success": true,
+  "message": "Operation completed successfully",
   "data": [
     {
       "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
       "template_code": "welcome_email",
       "version": 1,
       "subject": "Welcome, {{name}}!",
-      "body": "Hi {{name}}, visit {{link}}",
-      "created_at": "2023-10-26T10:00:00.000Z",
-      "updated_at": "2023-10-26T10:00:00.000Z"
+      "body": "Hi {{name}}, welcome to our platform. Click {{link}} to get started.",
+      "created_at": "2023-01-01T12:00:00.000Z",
+      "updated_at": "2023-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
+      "template_code": "welcome_email",
+      "version": 2,
+      "subject": "Welcome (v2), {{name}}!",
+      "body": "Hi {{name}}, welcome! You can find more info at {{link}}.",
+      "created_at": "2023-02-01T12:00:00.000Z",
+      "updated_at": "2023-02-01T12:00:00.000Z"
     }
   ],
-  "message": "List returned successfully",
   "meta": {
-    "total": 1,
+    "total": 2,
     "limit": 10,
     "page": 1,
     "total_pages": 1,
@@ -221,144 +250,178 @@ GET /api/v1/templates?template_code=welcome_email&page=1&limit=10
   }
 }
 ```
-**Errors**:
--   `503 Service Unavailable`: Template service currently unavailable.
 
-#### `GET /templates/get-by-code`
-**Description**: Retrieves the latest version of a template by its `template_code`.
-**Request**:
-```
-GET /api/v1/templates/get-by-code?template_code=welcome_email
-```
+**Errors**:
+-   `400 Bad Request`: Invalid query parameters provided.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
+
+#### GET /api/v1/templates/get-by-code
+**Description**: Retrieves the latest (highest version) template associated with a specific `template_code`.
+**Request Query Parameters**:
+-   `template_code` (required): The unique code identifying the template.
 **Response**:
 ```json
 {
   "success": true,
   "data": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "template_code": "welcome_email",
-    "version": 1,
-    "subject": "Welcome, {{name}}!",
-    "body": "Hi {{name}}, visit {{link}}",
-    "created_at": "2023-10-26T10:00:00.000Z",
-    "updated_at": "2023-10-26T10:00:00.000Z"
-  },
-  "message": "ok"
-}
-```
-**Errors**:
--   `400 Bad Request`: `template_code` is missing or invalid.
--   `404 Not Found`: Template with the specified code not found.
-
-#### `GET /templates/:id`
-**Description**: Retrieves a specific template version by its UUID.
-**Request**:
-```
-GET /api/v1/templates/a1b2c3d4-e5f6-7890-1234-567890abcdef
-```
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "template_code": "welcome_email",
-    "version": 1,
-    "subject": "Welcome, {{name}}!",
-    "body": "Hi {{name}}, visit {{link}}",
-    "created_at": "2023-10-26T10:00:00.000Z",
-    "updated_at": "2023-10-26T10:00:00.000Z"
-  },
-  "message": "ok"
-}
-```
-**Errors**:
--   `400 Bad Request`: Invalid UUID format.
--   `404 Not Found`: Template with the specified ID not found.
-
-#### `PATCH /templates/:id`
-**Description**: Updates an existing template, creating a new version with the changes.
-**Request**:
-```json
-{
-  "subject": "Updated Welcome Subject, {{name}}!",
-  "body": "Hello {{name}}, here is your new updated link: {{link}}"
-}
-```
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+    "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
     "template_code": "welcome_email",
     "version": 2,
-    "subject": "Updated Welcome Subject, {{name}}!",
-    "body": "Hello {{name}}, here is your new updated link: {{link}}",
-    "created_at": "2023-10-26T10:00:00.000Z",
-    "updated_at": "2023-10-26T10:00:00.000Z"
+    "subject": "Welcome (v2), {{name}}!",
+    "body": "Hi {{name}}, welcome! You can find more info at {{link}}.",
+    "created_at": "2023-02-01T12:00:00.000Z",
+    "updated_at": "2023-02-01T12:00:00.000Z"
   },
-  "message": "New version created"
+  "message": "ok"
 }
 ```
-**Errors**:
--   `400 Bad Request`: No fields to update provided or invalid data.
--   `404 Not Found`: Template with the specified ID not found.
 
-#### `DELETE /templates/:id`
-**Description**: Hard deletes a specific template version by its UUID.
-**Request**:
-```
-DELETE /api/v1/templates/a1b2c3d4-e5f6-7890-1234-567890abcdef
-```
-**Response**:
-`204 No Content`
 **Errors**:
--   `400 Bad Request`: Invalid UUID format.
--   `404 Not Found`: Template with the specified ID not found.
+-   `400 Bad Request`: `template_code` is missing from the query.
+-   `404 Not Found`: No template found for the given `template_code`.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
 
-#### `PATCH /users/update`
-**Description**: Updates details for the authenticated user.
-**Authentication**: Bearer Token
-**Request**:
-```json
-{
-  "name": "Jane Doe",
-  "email": "jane.doe@example.com",
-  "preferences": {
-    "email": false,
-    "push": true
-  }
-}
-```
+#### GET /api/v1/templates/:id
+**Description**: Fetches a single template version by its unique UUID.
+**Request Path Parameters**:
+-   `id` (required): The UUID of the template to retrieve.
 **Response**:
 ```json
 {
-  "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-  "email": "jane.doe@example.com",
-  "name": "Jane Doe",
-  "device_tokens": [
-    "faketoken123"
-  ],
+  "success": true,
+  "data": {
+    "id": "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
+    "template_code": "welcome_email",
+    "version": 2,
+    "subject": "Welcome (v2), {{name}}!",
+    "body": "Hi {{name}}, welcome! You can find more info at {{link}}.",
+    "created_at": "2023-02-01T12:00:00.000Z",
+    "updated_at": "2023-02-01T12:00:00.000Z"
+  },
+  "message": "ok"
+}
+```
+
+**Errors**:
+-   `400 Bad Request`: Invalid UUID format provided for `id`.
+-   `404 Not Found`: Template not found for the given `id`.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
+
+#### PATCH /api/v1/templates/:id
+**Description**: Applies partial updates to a template identified by its UUID, which results in the creation of a new template version incorporating the changes.
+**Request Path Parameters**:
+-   `id` (required): The UUID of the template to update.
+**Request**:
+```json
+{
+  "subject": "Revised Welcome (v3), {{name}}!",
+  "body": "Updated body for {{name}}, check {{link}}."
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+    "template_code": "welcome_email",
+    "version": 3,
+    "subject": "Revised Welcome (v3), {{name}}!",
+    "body": "Updated body for {{name}}, check {{link}}.",
+    "created_at": "2023-03-01T12:00:00.000Z",
+    "updated_at": "2023-03-01T12:00:00.000Z"
+  },
+  "message": "ok"
+}
+```
+
+**Errors**:
+-   `400 Bad Request`: Invalid UUID format for `id` or no valid fields provided for update.
+-   `404 Not Found`: Template not found for the given `id`.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
+
+#### DELETE /api/v1/templates/:id
+**Description**: Permanently deletes a specific template version identified by its UUID. This action only affects the specified version and does not impact other versions with the same `template_code`.
+**Request Path Parameters**:
+-   `id` (required): The UUID of the template version to delete.
+**Request**:
+No payload.
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Deleted"
+}
+```
+
+**Errors**:
+-   `400 Bad Request`: Invalid UUID format for `id`.
+-   `404 Not Found`: Template not found for the given `id`.
+-   `503 Service Unavailable`: The Template Service is currently unavailable.
+
+#### GET /api/v1/users/me
+**Description**: Retrieves the comprehensive profile details of the currently authenticated user.
+**Authentication**: Bearer Token required.
+**Request**:
+No payload.
+
+**Response**:
+```json
+{
+  "id": "c3f23a42-9e32-4f02-96a8-b4f1a5a3f6a2",
+  "email": "user@example.com",
+  "name": "Test User",
+  "created_at": "2025-11-12T20:45:31.000Z",
+  "updated_at": "2025-11-12T20:45:31.000Z"
+}
+```
+
+**Errors**:
+-   `401 Unauthorized`: Missing or invalid authentication token.
+-   `503 Service Unavailable`: The User Service is currently unavailable.
+
+#### PATCH /api/v1/users/update
+**Description**: Updates specific details of the authenticated user's profile.
+**Authentication**: Bearer Token required.
+**Request**:
+```json
+{
+  "name": "Updated Name",
   "preferences": {
     "email_notifications": false,
     "push_notifications": true
   }
 }
 ```
-**Errors**:
--   `400 Bad Request`: Invalid input or missing fields.
--   `401 Unauthorized`: Invalid or missing authentication token.
 
-#### `POST /users/device_tokens`
-**Description**: Adds a new device token for the authenticated user to receive push notifications.
-**Authentication**: Bearer Token
+**Response**:
+```json
+{
+  "id": "c3f23a42-9e32-4f02-96a8-b4f1a5a3f6a2",
+  "email": "user@example.com",
+  "name": "Updated Name",
+  "created_at": "2025-11-12T20:45:31.000Z",
+  "updated_at": "2025-11-12T21:15:42.000Z"
+}
+```
+
+**Errors**:
+-   `400 Bad Request`: Invalid input data provided.
+-   `401 Unauthorized`: Missing or invalid authentication token.
+-   `503 Service Unavailable`: The User Service is currently unavailable.
+
+#### POST /api/v1/users/devices
+**Description**: Registers a new device token for the authenticated user to enable push notifications.
+**Authentication**: Bearer Token required.
 **Request**:
 ```json
 {
-  "token": "newfaketoken456"
+  "device_token": "newDeviceToken123"
 }
 ```
+
 **Response**:
 ```json
 {
@@ -366,17 +429,22 @@ DELETE /api/v1/templates/a1b2c3d4-e5f6-7890-1234-567890abcdef
   "message": "Device token added successfully"
 }
 ```
-**Errors**:
--   `400 Bad Request`: Invalid or missing token.
--   `401 Unauthorized`: Invalid or missing authentication token.
 
-#### `DELETE /users/device_tokens/:token`
-**Description**: Removes a device token for the authenticated user.
-**Authentication**: Bearer Token
+**Errors**:
+-   `400 Bad Request`: Invalid `device_token` provided.
+-   `401 Unauthorized`: Missing or invalid authentication token.
+-   `503 Service Unavailable`: The User Service is currently unavailable.
+
+#### DELETE /api/v1/users/devices
+**Description**: Removes a specific device token associated with the authenticated user, stopping push notifications to that device.
+**Authentication**: Bearer Token required.
 **Request**:
+```json
+{
+  "device_token": "existingDeviceToken123"
+}
 ```
-DELETE /api/v1/users/device_tokens/faketoken123
-```
+
 **Response**:
 ```json
 {
@@ -384,65 +452,30 @@ DELETE /api/v1/users/device_tokens/faketoken123
   "message": "Device token removed successfully"
 }
 ```
+
 **Errors**:
--   `401 Unauthorized`: Invalid or missing authentication token.
--   `404 Not Found`: Device token not found for the user.
-
-## Usage
-The Gateway API acts as a facade, streamlining interactions with backend services. Authenticated users can securely manage their profiles and preferences, while also dispatching templated notifications. Administrative operations for template management are also routed through this gateway.
-
-Example: Authenticating a user and then sending a notification.
-
-1.  **Register a User**:
-    ```bash
-    curl -X POST \
-      http://localhost:3000/api/v1/auth/register \
-      -H 'Content-Type: application/json' \
-      -d '{
-            "email": "test@example.com",
-            "name": "Test User",
-            "preferences": { "email": true, "push": true },
-            "password": "StrongPassword123!"
-          }'
-    ```
-    This will return `access.token` and `user.id`.
-
-2.  **Send a Notification**:
-    Use the `access.token` obtained from registration/login in the Authorization header.
-    ```bash
-    curl -X POST \
-      http://localhost:3000/api/v1/notifications \
-      -H 'Content-Type: application/json' \
-      -H 'Authorization: Bearer <your_jwt_token>' \
-      -d '{
-            "template_code": "welcome_email_v1",
-            "variables": { "name": "Test User", "link": "https://example.com/start" }
-          }'
-    ```
-    Replace `<your_jwt_token>` with the actual token.
+-   `400 Bad Request`: Invalid `device_token` provided.
+-   `401 Unauthorized`: Missing or invalid authentication token.
+-   `404 Not Found`: The specified device token was not found for the user.
+-   `503 Service Unavailable`: The User Service is currently unavailable.
 
 ## Technologies Used
-
-| Technology         | Description                                                                                             | Link                                                                      |
-| :----------------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------ |
-| **NestJS**         | Progressive Node.js framework for building efficient, reliable and scalable server-side applications.   | [NestJS](https://nestjs.com/)                                             |
-| **TypeScript**     | Superset of JavaScript that adds optional static typing to the language.                                | [TypeScript](https://www.typescriptlang.org/)                             |
-| **Redis**          | In-memory data structure store, used as a cache for improved performance.                               | [Redis](https://redis.io/)                                                |
-| **RabbitMQ**       | Open-source message broker that implements the Advanced Message Queuing Protocol (AMQP).                | [RabbitMQ](https://www.rabbitmq.com/)                                     |
-| **JSON Web Tokens**| Standard for creating access tokens that assert claims to be transferred between two parties.           | [JWT](https://jwt.io/)                                                    |
-| **Opossum**        | Node.js circuit breaker library for robust service-to-service communication.                            | [Opossum](https://github.com/nodeshift/opossum)                           |
-| **Axios**          | Promise-based HTTP client for the browser and Node.js.                                                  | [Axios](https://axios-http.com/)                                          |
-| **Swagger/OpenAPI**| Tooling for designing, building, documenting, and consuming REST APIs.                                  | [Swagger](https://swagger.io/docs/specification/about-api-specification/) |
-| **ESLint**         | Pluggable linting utility for JavaScript and TypeScript.                                                | [ESLint](https://eslint.org/)                                             |
-| **Prettier**       | Opinionated code formatter.                                                                             | [Prettier](https://prettier.io/)                                          |
+-   **Framework**: [NestJS](https://nestjs.com/)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Runtime**: [Node.js](https://nodejs.org/)
+-   **API Documentation**: [Swagger](https://swagger.io/)
+-   **Caching**: [Redis](https://redis.io/) via `@keyv/redis` and `cacheable`
+-   **Message Broker**: [RabbitMQ](https://www.rabbitmq.com/) via `@nestjs/microservices`
+-   **HTTP Client**: [Axios](https://axios-http.com/) with `axios-retry`
+-   **Resilience**: [Opossum](https://github.com/nodesource/opossum) (Circuit Breaker)
+-   **Authentication**: [Passport-JWT](https://www.npmjs.com/package/passport-jwt) & [NestJS JWT](https://docs.nestjs.com/security/authentication#jwt-strategy)
+-   **Code Quality**: [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/)
 
 ## License
-This project is currently UNLICENSED. Refer to the `package.json` file for more details.
+This project is currently UNLICENSED as specified in `package.json`.
+
 
 ## Author Info
-
-<<<<<<< HEAD
-<<<<<<< HEAD
 👋 **Oluwaseyi Oke**
 
 Experienced Software Developer specializing in backend development. Connect with me!
@@ -454,27 +487,6 @@ Experienced Software Developer specializing in backend development. Connect with
 ---
 
 [![Maintained by iamArvy](https://img.shields.io/badge/Maintained%20by-iamArvy-blue)](https://github.com/iamArvy)
-=======
-=======
->>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
-👋 **Emmanuel Okwudili**
 
-Experienced Software Engineer specializing in backend development. Connect with me!
-
--   **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/emmanuelokwudili)
--   **Portfolio**: [Your Portfolio Website](https://your-portfolio.com)
--   **Email**: [Your Email Address](mailto:youremail@example.com)
-
----
-
-[![Maintained by Emmanuel](https://img.shields.io/badge/Maintained%20by-Emmanuel-blue)](https://github.com/emmanueldev247)
-<<<<<<< HEAD
->>>>>>> 5b9535c (feat(gateway:template): create Template module and restructure DTOs)
-=======
->>>>>>> c4c090e (feat(gateway:template): create Template module and restructure DTOs)
-[![Made with NestJS](https://img.shields.io/badge/Made%20with-NestJS-red)](https://nestjs.com/)
-[![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Runtime-Node.js-green?logo=node.js)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/License-UNLICENSED-red)](https://choosealicense.com/licenses/unlicense/)
-
+## Dokugen Badge
 [![Readme was generated by Dokugen](https://img.shields.io/badge/Readme%20was%20generated%20by-Dokugen-brightgreen)](https://www.npmjs.com/package/dokugen)
