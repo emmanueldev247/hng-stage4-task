@@ -1,98 +1,197 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Push Notification Service API 🚀
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
+This project is a robust and scalable real-time push notification service built with **NestJS**, **TypeScript**, and **Node.js**. It leverages **RabbitMQ** for asynchronous message processing, **Redis** for efficient caching and request deduplication, and **Firebase Admin SDK** for reliable push notification delivery. Designed with resilience in mind, it incorporates the **Circuit Breaker pattern** to ensure stability when interacting with external services.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
+*   ✨ **Asynchronous Notification Processing**: Utilizes RabbitMQ to asynchronously consume and process push notification requests, ensuring high throughput and decoupled architecture.
+*   🚀 **Firebase Push Notification Delivery**: Integrates with Firebase Admin SDK to send targeted push notifications to mobile devices.
+*   🛡️ **Circuit Breaker Pattern**: Implements the Opossum Circuit Breaker to enhance resilience and prevent cascading failures when external services (like Firebase) experience issues.
+*   ⚡ **Request Deduplication**: Employs Redis caching to prevent duplicate processing of notification requests, improving efficiency and resource utilization.
+*   💖 **Health Monitoring**: Provides a simple HTTP endpoint to check the service's operational status.
+*   📝 **Configurable**: Environment variables allow easy configuration of messaging queues, caching, and Firebase credentials.
 
-## Description
+## Getting Started
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Installation
+To get this project up and running on your local machine, follow these steps:
 
-## Project setup
+*   **Clone the Repository**:
+    ```bash
+    git clone https://github.com/emmanueldev247/hng-stage4-task.git
+    cd hng-stage4-task
+    ```
+*   **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+*   **Build the Project**:
+    ```bash
+    npm run build
+    ```
+*   **Start the Application in Development Mode**:
+    ```bash
+    npm run start:dev
+    ```
+    Or in production mode:
+    ```bash
+    npm run start:prod
+    ```
 
-```bash
-$ pnpm install
+### Environment Variables
+Create a `.env` file in the root directory and populate it with the following required environment variables:
+
+```dotenv
+REDIS_URL=redis://localhost:6379
+RABBITMQ_URL=amqp://localhost:5672
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"your-project-id","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"...","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"...","universe_domain":"googleapis.com"}
+PORT=3004
 ```
 
-## Compile and run the project
+## Usage
+This service primarily functions as a microservice consumer for push notification events. Once the service is running and connected to your RabbitMQ instance, it will listen for messages on the `push.queue` with the event pattern `notifications.push`.
 
-```bash
-# development
-$ pnpm run start
+To trigger a push notification, publish a message to your RabbitMQ instance targeting the `notifications.push` event. The payload should conform to the `NotificationPayloadDto` structure:
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```json
+{
+  "request_id": "unique-notification-id-123",
+  "to": ["device_token_1", "device_token_2"],
+  "title": "New Message!",
+  "message": "You have a new message from a friend."
+}
 ```
 
-## Run tests
+Example of how to publish a message (using `amqplib` in Node.js):
 
-```bash
-# unit tests
-$ pnpm run test
+```javascript
+const amqp = require('amqplib');
 
-# e2e tests
-$ pnpm run test:e2e
+async function sendNotification() {
+  const connection = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost:5672');
+  const channel = await connection.createChannel();
 
-# test coverage
-$ pnpm run test:cov
+  const queue = 'push.queue';
+  const eventPattern = 'notifications.push'; // This is the EventPattern in NestJS
+
+  await channel.assertQueue(queue, { durable: true });
+
+  const payload = {
+    request_id: 'unique-notification-id-456',
+    to: ['device_token_xyz_123', 'device_token_abc_789'], // Replace with actual Firebase device tokens
+    title: 'Reminder!',
+    message: 'Don\'t forget your meeting at 3 PM today.'
+  };
+
+  channel.publish(
+    '', // default exchange
+    queue, // routing key for the queue
+    Buffer.from(JSON.stringify(payload)),
+    { persistent: true, headers: { 'x-pattern': eventPattern } } // x-pattern header is important for NestJS microservices
+  );
+
+  console.log(`[x] Sent '${JSON.stringify(payload)}'`);
+  setTimeout(() => {
+    connection.close();
+    process.exit(0);
+  }, 500);
+}
+
+sendNotification().catch(console.error);
 ```
 
-## Deployment
+The service will consume this message, check for deduplication in Redis, and then attempt to send the push notification via Firebase. It includes retry logic and a circuit breaker to handle transient failures gracefully.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Push Notification Service API
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Overview
+This service provides core functionality for handling push notification requests, including receiving events via RabbitMQ, caching processed requests, and dispatching notifications through Firebase, while offering a simple HTTP health check endpoint. It's built with NestJS to ensure a modular and scalable architecture.
 
+### Features
+- `NestJS`: Building scalable and maintainable server-side applications.
+- `RabbitMQ`: Asynchronous message processing for push notifications.
+- `Redis`: Efficient caching for request deduplication.
+- `Firebase Admin SDK`: Sending real-time push notifications to devices.
+- `Opossum`: Implementing circuit breaker patterns for resilience against external service failures.
+
+### Getting Started
+### Installation
+To run this API locally, ensure you have Node.js and npm installed.
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# Clone the repository
+git clone https://github.com/emmanueldev247/hng-stage4-task.git
+cd hng-stage4-task
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Start the application in production mode
+npm start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Environment Variables
+The following environment variables are required to configure the service.
+- `REDIS_URL`: URL for the Redis server.
+  Example: `REDIS_URL=redis://localhost:6379`
+- `RABBITMQ_URL`: URL for the RabbitMQ server.
+  Example: `RABBITMQ_URL=amqp://localhost:5672`
+- `FIREBASE_SERVICE_ACCOUNT`: A JSON string containing the Firebase service account credentials.
+  Example: `FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"my-app","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"...","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"...","universe_domain":"googleapis.com"}`
+- `PORT`: The port on which the HTTP health check server will listen.
+  Example: `PORT=3004`
 
-## Resources
+## API Documentation
+### Base URL
+The HTTP API root path is `http://localhost:3004` (or `http://0.0.0.0:3004` depending on host configuration).
 
-Check out a few resources that may come in handy when working with NestJS:
+### Endpoints
+#### GET /health
+Checks the operational status of the service.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+**Request**:
+No request body is required.
 
-## Support
+**Response**:
+```json
+{
+  "status": "OK",
+  "message": "Server is running"
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**Errors**:
+- `500 Internal Server Error`: An unexpected error occurred while checking the server status.
 
-## Stay in touch
+## Technologies Used
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Technology             | Description                                                               | Link                                                               |
+| :--------------------- | :------------------------------------------------------------------------ | :----------------------------------------------------------------- |
+| **NestJS**             | A progressive Node.js framework for building efficient and scalable apps. | [NestJS](https://nestjs.com/)                                      |
+| **TypeScript**         | A typed superset of JavaScript that compiles to plain JavaScript.         | [TypeScript](https://www.typescriptlang.org/)                      |
+| **Node.js**            | A JavaScript runtime built on Chrome's V8 JavaScript engine.              | [Node.js](https://nodejs.org/en/)                                  |
+| **RabbitMQ**           | A widely used open source message broker.                                 | [RabbitMQ](https://www.rabbitmq.com/)                              |
+| **Redis**              | An open source (BSD licensed), in-memory data structure store.            | [Redis](https://redis.io/)                                         |
+| **Firebase Admin SDK** | Enables server-side interaction with Firebase services.                   | [Firebase Admin](https://firebase.google.com/docs/admin/setup)     |
+| **Opossum**            | A Circuit Breaker library for Node.js.                                    | [Opossum](https://github.com/nodeshift/opossum)                    |
 
-## License
+## Author Info
+👋 **Oluwaseyi Oke**
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Experienced Software Developer specializing in backend development. Connect with me!
+
+-   **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/oluwaseyi-oke-fullstack-developer)
+-   **Portfolio**: [Your Portfolio Website](https://oke-oluwaseyi-portfolio.vercel.app)
+-   **Email**: [Your Email Address](mailto:okeoluwaseyimarvellous@gmail.com)
+
+---
+
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11.x-red?logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-red?logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
+[![Redis](https://img.shields.io/badge/Redis-red?logo=redis&logoColor=white)](https://redis.io/)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/emmanueldev247/hng-stage4-task/actions)
+[![Readme was generated by Dokugen](https://img.shields.io/badge/Readme%20was%20generated%20by-Dokugen-brightgreen)](https://www.npmjs.com/package/dokugen)
