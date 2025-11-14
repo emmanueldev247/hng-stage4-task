@@ -17,7 +17,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  
+
   app.use(requestLogger);
   app.useGlobalInterceptors(new RpcLoggerInterceptor());
 
@@ -32,6 +32,14 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, documentFactory, {
     jsonDocumentUrl: 'swagger/json',
   });
+
+  const http = app.getHttpAdapter();
+
+  // redirect legacy /api/v1/docs → /api/docs
+  http.get('/api/v1/docs', (req, res) => {
+    res.redirect(302, '/api/docs');
+  });
+
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
