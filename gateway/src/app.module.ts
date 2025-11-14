@@ -7,9 +7,15 @@ import { CacheModule } from './cache/cache.module';
 import { UserModule } from './modules/user/user.module';
 import { TemplateModule } from './modules/template/template.module';
 import { HealthModule } from './modules/health/health.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public', 'fcm'),
+      serveRoot: '/fcm',
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

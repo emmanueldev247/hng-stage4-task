@@ -21,9 +21,17 @@ async function bootstrap() {
   app.use(requestLogger);
   app.useGlobalInterceptors(new RpcLoggerInterceptor());
 
+  const port = process.env.PORT ?? 3000;
+  const fcmHelperUrl = process.env.FCM_HELPER_URL ?? `http://localhost:${port}/fcm`;
+
   const config = new DocumentBuilder()
     .setTitle('Notification Application')
-    .setDescription('Notification Application API Documentation')
+    .setDescription(
+      [
+        'Notification Application API Documentation.',
+        `Need an FCM device token for push tests? Open ${fcmHelperUrl} to grant permission, copy the token, and follow the instructions on the page.`,
+      ].join('\n\n'),
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .setVersion('1.0')
@@ -40,6 +48,6 @@ async function bootstrap() {
     res.redirect(302, '/api/docs');
   });
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
