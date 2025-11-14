@@ -28,8 +28,10 @@ async function ensureTopology(rabbitUrl: string) {
 
     await ch.assertQueue(QUEUE, {
       durable: true,
-      deadLetterExchange: DLX,
-      deadLetterRoutingKey: DLQ_ROUTING_KEY,
+      arguments: {
+        'x-dead-letter-exchange': DLX,
+        'x-dead-letter-routing-key': DLQ_ROUTING_KEY,
+      },
     });
 
     await ch.assertQueue(DLQ, { durable: true });
@@ -48,6 +50,7 @@ async function bootstrap() {
 
   const rabbitUrl =
     configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672';
+  console.log('RabbitMQ URL:', rabbitUrl);
 
   await ensureTopology(rabbitUrl);
 
@@ -58,8 +61,10 @@ async function bootstrap() {
       queue: 'email.queue',
       queueOptions: {
         durable: true,
-        deadLetterExchange: 'notifications.direct',
-        deadLetterRoutingKey: 'failed.queue',
+        arguments: {
+          'x-dead-letter-exchange': 'notifications.direct',
+          'x-dead-letter-routing-key': 'failed.queue',
+        },
       },
       noAck: false,
       prefetchCount: 1,
