@@ -16,6 +16,19 @@ This project is a TypeScript Node.js API Gateway built with NestJS. It acts as a
 -   **Swagger API Documentation**: Automatically generates and serves interactive API documentation.
 -   **Microservice Communication**: Achieves inter-service communication via HTTP clients and RabbitMQ.
 
+## FCM Token Helper (Web UI)
+The Gateway serves a static helper page at `http://localhost:3000/fcm` (see `public/fcm/index.html`) that lets developers request a Firebase Cloud Messaging device token directly from the browser.
+
+**How to use**
+1. Start the Gateway locally so static assets are served.
+2. Navigate to `http://localhost:3000/fcm` and click **Request permission & fetch token**. Grant the notification permission prompt when asked.
+3. After the token is generated, copy it from the “Latest token” card (clicking the card copies it to your clipboard).
+4. Follow the “Next steps” cards underneath to either:
+   - include the token in the `push_token` field when registering via `POST /api/v1/register`, or
+   - add it later via `POST /api/v1/users/devices` (`device_token`).
+
+Only non-secret Firebase client config and the public VAPID key are embedded in this page, so it is safe to host inside the Gateway.
+
 ## Getting Started
 ### Installation
 To set up the project locally, follow these steps:
@@ -60,6 +73,7 @@ The following environment variables are required to run the application. Create 
     *Example*: `yourStrongJwtSecretKey`
 -   `PORT`: The port on which the API Gateway will listen.
     *Example*: `3000`
+-   `FCM_HELPER_URL` *(optional)*: Overrides the URL shown inside Swagger docs for the `/fcm` helper page. Defaults to `http://localhost:{PORT}/fcm`.
 
 ## API Documentation
 ### Base URL

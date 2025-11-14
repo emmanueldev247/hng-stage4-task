@@ -149,6 +149,7 @@ Common variables you will encounter:
 | `SENDGRID_API_KEY`         | email                | <your_SendGrid_key>                                       |
 | `REDIS_URL`                | email, push          | `redis://localhost:6379`                                  |
 | `FIREBASE_SERVICE_ACCOUNT` | push                 | entire JSON (stringified) for FCM admin SDK               |
+| `FCM_HELPER_URL`           | gateway              | Override Swagger link for `/fcm` helper (default `http://localhost:{PORT}/fcm`) |
 
 **Notes**
 
@@ -160,6 +161,16 @@ Common variables you will encounter:
 ## Gateway API (Quick Guide)
 
 Swagger: `http://localhost:3000/api/v1/docs`
+
+### Browser FCM token helper
+
+Need a Firebase Cloud Messaging device token for push tests? When the Gateway is running, open `http://localhost:3000/fcm`. The page will:
+
+- request notification permission and call Firebase (`public/fcm/index.html`)
+- display the freshly issued token in a copy-to-clipboard card
+- show the exact payloads to either register with `push_token` or attach it later via `POST /api/v1/users/devices`
+
+Use this page whenever you or QA testers need a new device token without touching the CLI or scripts.
 
 ### Auth
 
