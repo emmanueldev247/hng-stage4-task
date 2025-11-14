@@ -65,7 +65,7 @@ export class UserClient extends BaseHttpClient {
 
   async addToken(userId: string, device_token: string) {
     await this.request({
-      method: 'PUT',
+      method: 'POST',
       url: `/users/${userId}/devices`,
       data: { device_token },
     });

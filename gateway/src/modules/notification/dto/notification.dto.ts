@@ -11,7 +11,7 @@ export class NotificationDto {
   @IsNotEmpty({ message: 'template_code is required' })
   @ApiProperty({
     description: 'The unique code of the notification template to use',
-    example: 'welcome_email_v1',
+    example: 'register_hng',
   })
   template_code: string;
 
@@ -20,7 +20,7 @@ export class NotificationDto {
   @ApiProperty({
     description:
       'Key-value pairs for template placeholders. All required placeholders must be provided.',
-    example: { name: 'John Doe', link: 'https://example.com/verify' },
+    example: { name: 'John Doe', link: 'https://hng.tech/internship' },
   })
   variables: Record<string, string>;
 }

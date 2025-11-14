@@ -19,7 +19,7 @@ export class EmailController {
     this.logger.log('🚀 Email microservice ready - listening on email.queue');
   }
 
-  @EventPattern('email.notification')
+  @EventPattern('notifications.email')
   async handleEmailNotification(
     @Payload() raw: any,
     @Ctx() context: RmqContext,

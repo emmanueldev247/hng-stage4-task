@@ -12,10 +12,10 @@ async function sendTestMessage() {
     });
 
     const message = {
-      pattern: 'email.notification',
+      pattern: 'notifications.email',
       data: {
         request_id: 'test-' + Date.now(),
-        to: 'test@example.com',
+        to: 'alt.z2-6xf24bk@yopmail.com',
         subject: 'Test Email from Professional Service',
         body: '<h1>Test Email</h1><p>This is a test email from the professional email service.</p><p>Time: ' + new Date().toISOString() + '</p>',
       }
@@ -23,7 +23,7 @@ async function sendTestMessage() {
 
     channel.publish(
       'notifications.direct',
-      'email.notification',
+      'notifications.email',
       Buffer.from(JSON.stringify(message)),
       { persistent: true }
     );

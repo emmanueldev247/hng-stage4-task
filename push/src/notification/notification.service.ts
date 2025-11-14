@@ -4,6 +4,7 @@ import { FirebaseService } from 'src/firebase/firebase.provider';
 import { CacheService } from 'src/cache/cache.service';
 import { ProcessedRequestDto } from './dto/processed-request.dto';
 import * as CircuitBreaker from 'opossum';
+import { StatusReporterService } from './status-reporter.service';
 
 @Injectable()
 export class NotificationService {
@@ -12,6 +13,7 @@ export class NotificationService {
   constructor(
     private readonly firebase: FirebaseService,
     private readonly cache: CacheService,
+    private readonly statusReporter: StatusReporterService,
   ) {
     this.breaker = new CircuitBreaker(
       async (data: NotificationPayloadDto) => {
@@ -22,7 +24,7 @@ export class NotificationService {
             await this.firebase.sendPushNotification(
               data.to,
               data.title,
-              data.message,
+              data.body,
               { request_id: data.request_id },
             );
             return;
@@ -65,7 +67,7 @@ export class NotificationService {
       return;
     }
     try {
-      await this.breaker.fire(data);
+      const resp: any = await this.breaker.fire(data);
 
       await this.cache.set(
         `processed:${request_id}`,
@@ -78,11 +80,28 @@ export class NotificationService {
       this.logger.log(
         `Push sent successfully for request_id=${data.request_id}`,
       );
+      const invalidTokens = Array.isArray((resp as any)?.invalidTokens)
+        ? (resp as any).invalidTokens
+        : undefined;
+
+      await this.statusReporter.report({
+        notification_id: request_id,
+        status: 'delivered',
+        timestamp: new Date().toISOString(),
+        invalid_tokens: invalidTokens,
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.error(
         `Push failed for request_id=${data.request_id}: ${msg}`,
       );
+
+      await this.statusReporter.report({
+        notification_id: request_id,
+        status: 'failed',
+        timestamp: new Date().toISOString(),
+        error: msg,
+      });
       throw err;
     }
   }

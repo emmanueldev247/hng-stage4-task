@@ -4,6 +4,7 @@ import { SendGridService } from './sendgrid.service';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { RedisService } from './redis.service';
 import { SimplifiedNotificationDto } from '../dtos/notification.dto';
+import { StatusReporterService } from './status-reporter.service';
 
 @Injectable()
 export class EmailService {
@@ -16,6 +17,7 @@ export class EmailService {
     private sendGridService: SendGridService,
     private circuitBreaker: CircuitBreakerService,
     private redisService: RedisService,
+    private statusReporter: StatusReporterService,
   ) {}
 
   async processEmailNotification(
@@ -55,9 +57,25 @@ export class EmailService {
       this.circuitBreaker.onSuccess('sendgrid');
 
       this.logger.log(`📨 Email delivered: ${request_id} to ${to}`);
+
+      // Report status
+      await this.statusReporter.report({
+        notification_id: request_id,
+        status: 'delivered',
+        timestamp: new Date().toISOString(),
+      });
     } catch (error) {
       this.circuitBreaker.onFailure('sendgrid');
       this.logger.error(`💥 Failed to process email ${request_id}:`, error);
+
+      try {
+        await this.statusReporter.report({
+          notification_id: request_id,
+          status: 'failed',
+          timestamp: new Date().toISOString(),
+          error: error?.message ?? String(error),
+        });
+      } catch {}
       throw error;
     }
   }

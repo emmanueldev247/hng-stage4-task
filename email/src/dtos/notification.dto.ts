@@ -4,10 +4,3 @@ export class SimplifiedNotificationDto {
   subject: string;
   body: string;
 }
-
-export class NotificationStatusDto {
-  notification_id: string;
-  status: 'delivered' | 'pending' | 'failed';
-  timestamp?: Date;
-  error?: string;
-}

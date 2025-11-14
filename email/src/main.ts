@@ -11,7 +11,7 @@ import * as amqp from 'amqplib';
 async function ensureTopology(rabbitUrl: string) {
   const EXCHANGE = 'notifications.direct';
   const EXCHANGE_TYPE: 'direct' = 'direct';
-  const ROUTING_KEY = 'email.notification';
+  const ROUTING_KEY = 'notifications.email';
 
   const QUEUE = 'email.queue';
 
@@ -47,8 +47,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const rabbitUrl =
-    configService.get<string>('RABBITMQ_URL') ||
-    'amqp://devuser:devpass@localhost:5672/%2F';
+    configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672';
 
   await ensureTopology(rabbitUrl);
 
@@ -78,7 +77,7 @@ async function bootstrap() {
     .addTag('email')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
