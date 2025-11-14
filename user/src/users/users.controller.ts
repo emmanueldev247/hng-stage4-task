@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -79,8 +80,14 @@ export class UsersController {
   }
 
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.usersService.update(id, updateUserDto);
+  async update(@Param("id") id: string, @Body() dto: UpdateUserDto) {
+    const definedOnly = Object.fromEntries(
+      Object.entries(dto).filter(([, v]) => v !== undefined)
+    );
+    if (Object.keys(definedOnly).length === 0) {
+      throw new BadRequestException("No updates provided");
+    }
+    const updatedUser = await this.usersService.update(id, dto);
     return {
       success: true,
       message: "User updated successfully",
