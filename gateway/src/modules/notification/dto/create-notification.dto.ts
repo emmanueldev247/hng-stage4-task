@@ -47,15 +47,9 @@ export class CreateNotificationDto {
   @IsObject()
   variables!: Record<string, any>;
 
-  @ApiPropertyOptional({
-    description:
-      'Optional idempotency key. If omitted, the gateway will generate a UUID v4.',
-      example: '550e8400-e29b-41d4-a716-446655440000',
-  })
   @IsOptional()
   @IsString()
   request_id?: string;
-
 
   @IsOptional()
   @IsInt()
