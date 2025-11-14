@@ -196,7 +196,7 @@ Content-Type: application/json
 Authorization: Bearer <token>   # optional if you pass user_id
 
 {
-  "notification_type": "email" | "push",   // omit to follow user preferences
+  "notification_type": "email" | "push",
   "user_id": "uuid (optional if JWT present)",
   "template_code": "register_hng",
   "variables": {
@@ -327,6 +327,10 @@ More: [Push README](./push/README.md)
   The Gateway enforces missing placeholder validation (e.g., `{{name}}`); include all required variables.
 - **JWT expired**  
   Access tokens are short-lived by design. Re-login or use the refresh flow (see Gateway auth docs).
+
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/kUlXcc6hsKA/maxresdefault.jpg)](https://youtu.be/kUlXcc6hsKA)
 
 ---
 
