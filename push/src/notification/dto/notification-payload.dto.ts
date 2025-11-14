@@ -11,5 +11,5 @@ export class NotificationPayloadDto {
   title: string;
 
   @IsString()
-  message: string;
+  body: string;
 }

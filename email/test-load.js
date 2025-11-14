@@ -10,7 +10,7 @@ async function sendLoadTest() {
   
   for (let i = 0; i < 5; i++) {
     const message = {
-      pattern: 'email.notification',
+      pattern: 'notifications.email',
       data: {
         request_id: `load-test-${Date.now()}-${i}`,
         to: `user${i}@example.com`,
@@ -21,7 +21,7 @@ async function sendLoadTest() {
     
     channel.publish(
       'notifications.direct', 
-      'email.notification', 
+      'notifications.email', 
       Buffer.from(JSON.stringify(message)),
       { persistent: true }
     );

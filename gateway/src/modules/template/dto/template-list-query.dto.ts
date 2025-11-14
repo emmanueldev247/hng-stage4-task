@@ -5,7 +5,7 @@ import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 export class TemplateListQueryDto {
   @ApiPropertyOptional({
     description: 'Filter templates by template code',
-    example: 'WELCOME_EMAIL',
+    example: 'register_hng',
   })
   @IsString()
   @IsOptional()

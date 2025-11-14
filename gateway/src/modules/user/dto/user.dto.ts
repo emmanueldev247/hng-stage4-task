@@ -10,7 +10,7 @@ export class UserDto {
 
   @ApiProperty({
     description: 'Email address of the user',
-    example: 'john.doe@example.com',
+    example: 'emmydee4321234@yopmail.com',
   })
   email: string;
 

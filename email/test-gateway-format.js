@@ -9,7 +9,7 @@ async function testGatewayFormat() {
   console.log('📨 Testing Professional Gateway Format...');
   
   const gatewayMessage = {
-    pattern: 'email.notification',
+    pattern: 'notifications.email',
     data: {
       request_id: 'gateway-pro-' + Date.now(),
       to: 'professional.user@company.com',
@@ -20,7 +20,7 @@ async function testGatewayFormat() {
 
   channel.publish(
     'notifications.direct', 
-    'email.notification',
+    'notifications.email',
     Buffer.from(JSON.stringify(gatewayMessage)),
     { persistent: true }
   );

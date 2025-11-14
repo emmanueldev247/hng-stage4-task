@@ -65,26 +65,48 @@ export class FirebaseService implements OnModuleInit {
     body: string,
     data?: Record<string, string>,
   ) {
-    if (!tokens.length) return;
+    const unique = Array.from(new Set(tokens)).filter(Boolean);
+    if (!unique.length) return;
 
     const message: admin.messaging.MulticastMessage = {
-      tokens,
-      notification: { title, body },
+      tokens: unique,
+      notification: { title, body: this.stripHtml(body) }, // strip HTML
       data,
     };
 
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const resp = await admin.messaging().sendEachForMulticast(message);
 
-    // Remove invalid tokens
-    const invalidTokens = response.responses
-      .map((res, i) => (!res.success ? tokens[i] : null))
-      .filter(Boolean) as string[];
+    const invalid: string[] = [];
+    resp.responses.forEach((r, i) => {
+      const token = unique[i];
+      if (!r.success) {
+        const code = (r.error as any)?.code ?? 'unknown';
+        const msg = (r.error as any)?.message ?? String(r.error);
+        this.logger.warn(
+          `FCM error for token=${token}: code=${code} msg=${msg}`,
+        );
 
-    if (invalidTokens.length > 0) {
-      this.logger.warn(`Removing ${invalidTokens.length} invalid tokens`);
-      // If there's time make an event called invalid token that is received by user service to remove the token from the user tokens
+        if (
+          code === 'messaging/registration-token-not-registered' ||
+          code === 'messaging/invalid-registration-token'
+        ) {
+          invalid.push(token);
+        }
+      }
+    });
+
+    if (invalid.length > 0) {
+      this.logger.warn(`Removing ${invalid.length} invalid tokens`);
     }
 
-    return response;
+    return resp;
+  }
+
+  // --- helper: HTML stripper for push notifications
+  private stripHtml(html: string): string {
+    return html
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }

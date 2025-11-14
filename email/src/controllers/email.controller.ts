@@ -10,51 +10,54 @@ export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
   async onModuleInit() {
-    this.logger.log('✅ Email Controller initialized - waiting for messages...');
+    this.logger.log(
+      '✅ Email Controller initialized - waiting for messages...',
+    );
   }
 
   async onApplicationBootstrap() {
     this.logger.log('🚀 Email microservice ready - listening on email.queue');
   }
 
-  @EventPattern('email.notification')
+  @EventPattern('notifications.email')
   async handleEmailNotification(
-    @Payload() data: any,
+    @Payload() raw: any,
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
-    
-    this.logger.log('📨 Received RabbitMQ message');
+
+    const rk = originalMsg?.fields?.routingKey;
+    const corr = originalMsg?.properties?.correlationId ?? '-';
+    this.logger.log(`📨 Received message rk=${rk} corr=${corr}`);
+
+    const data: any =
+      raw && typeof raw === 'object'
+        ? 'data' in raw && raw.pattern
+          ? raw.data
+          : raw
+        : raw;
 
     try {
-      // Extract data 
-      const notificationData = data.pattern && data.data ? data.data : data;
+      if (!data?.request_id) throw new Error('Missing request_id');
+      if (!data?.to || !String(data.to).includes('@'))
+        throw new Error('Invalid email address');
+      if (!data?.subject || !String(data.subject).trim())
+        throw new Error('Empty subject');
 
-      // MINIMAL VALIDATION - Critical fields only
-      if (!notificationData?.request_id) {
-        throw new Error('Missing request_id - cannot ensure idempotency');
-      }
-
-      if (!notificationData?.to || !notificationData.to.includes('@')) {
-        throw new Error('Invalid email address format');
-      }
-
-      if (!notificationData?.subject?.trim()) {
-        throw new Error('Empty email subject');
-      }
-
-      this.logger.log(`📧 Processing email: ${notificationData.request_id}`);
-      
-      // Process the email
-      await this.emailService.processEmailNotification(notificationData as SimplifiedNotificationDto);
+      this.logger.log(
+        `📧 Processing email request_id=${data.request_id} to=${data.to}`,
+      );
+      await this.emailService.processEmailNotification(
+        data as SimplifiedNotificationDto,
+      );
 
       channel.ack(originalMsg);
-      this.logger.log(`✅ Email sent successfully: ${notificationData.request_id}`);
-      
-    } catch (error) {
-      this.logger.error(`❌ Failed to process: ${error.message}`);
-      // Send to DLQ for investigation
+      this.logger.log(`✅ Acked request_id=${data.request_id}`);
+    } catch (err: any) {
+      this.logger.error(
+        `❌ Error request_id=${data?.request_id ?? '-'}: ${err?.message ?? err}`,
+      );
       channel.nack(originalMsg, false, false);
     }
   }

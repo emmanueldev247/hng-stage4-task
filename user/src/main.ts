@@ -10,8 +10,8 @@ async function bootstrap() {
   // Enable validation for all DTOs
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Strip away properties that are not in the DTO
-      forbidNonWhitelisted: true, // Throw error if unknown properties are sent
+      whitelist: true,
+      forbidNonWhitelisted: true,
     })
   );
 
@@ -29,5 +29,5 @@ async function bootstrap() {
 }
 bootstrap().catch((err) => {
   console.error("Bootstrap failed:", err);
-  process.exit(1); // Exit  process if startup fails
+  process.exit(1);
 });

@@ -6,6 +6,7 @@ import { SendGridService } from './services/sendgrid.service';
 import { CircuitBreakerService } from './services/circuit-breaker.service';
 import { RedisService } from './services/redis.service';
 import { HealthController } from './controllers/health.controller';
+import { StatusReporterService } from './services/status-reporter.service';
 
 @Module({
   imports: [
@@ -15,6 +16,12 @@ import { HealthController } from './controllers/health.controller';
     }),
   ],
   controllers: [EmailController, HealthController],
-  providers: [EmailService, SendGridService, CircuitBreakerService, RedisService],
+  providers: [
+    EmailService,
+    SendGridService,
+    CircuitBreakerService,
+    RedisService,
+    StatusReporterService,
+  ],
 })
 export class EmailModule {}

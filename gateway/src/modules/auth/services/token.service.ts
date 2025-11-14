@@ -19,7 +19,7 @@ export class TokenService {
   }
 
   async access(id: string): Promise<TokenDto> {
-    return await this.generate({ sub: id, type: 'access' }, 15 * 60);
+    return await this.generate({ sub: id, type: 'access' }, 60 * 60 * 3);
   }
   async refresh(id: string): Promise<TokenDto> {
     return await this.generate({ sub: id, type: 'refresh' }, 7 * 24 * 60 * 60);

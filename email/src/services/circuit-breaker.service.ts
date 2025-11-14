@@ -1,4 +1,3 @@
-// src/services/circuit-breaker.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 
 interface CircuitBreakerState {
@@ -14,7 +13,7 @@ export class CircuitBreakerService {
   private states: Map<string, CircuitBreakerState> = new Map();
   
   private readonly failureThreshold = 5;
-  private readonly resetTimeout = 60000; // 1 minute
+  private readonly resetTimeout = 60000;
 
   canExecute(service: string): boolean {
     const now = Date.now();
