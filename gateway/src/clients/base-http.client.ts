@@ -16,6 +16,7 @@ import axios, {
 } from 'axios';
 import axiosRetry from 'axios-retry';
 import * as CircuitBreaker from 'opossum';
+import { HttpException } from '@nestjs/common';
 
 @Injectable()
 export abstract class BaseHttpClient {
@@ -87,24 +88,17 @@ export abstract class BaseHttpClient {
   }
 
   private mapAxiosError(error: AxiosError): never {
-    const status = error.response?.status;
-    const message = error.message;
+    const status = error.response?.status ?? 503;
 
-    switch (status) {
-      case 400:
-        throw new BadRequestException(message);
-      case 401:
-        throw new UnauthorizedException(message);
-      case 404:
-        throw new NotFoundException(message);
-      case 409:
-        throw new ConflictException(message);
-      case 500:
-      default:
-        this.logger.error(`[${this.serviceName}] Internal error: ${message}`);
-        throw new ServiceUnavailableException(
-          `${this.serviceName} service error: ${message}`,
-        );
-    }
+    const upstream = error.response?.data;
+
+    const payload =
+      upstream && typeof upstream === 'object'
+        ? upstream
+        : { message: String(upstream ?? error.message) };
+    this.logger.error(
+      `[${this.serviceName}] upstream ${status}: ${JSON.stringify(payload)}`,
+    );
+    throw new HttpException(payload, status);
   }
 }

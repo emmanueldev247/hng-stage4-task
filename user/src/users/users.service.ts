@@ -33,47 +33,55 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const { email, password, name, preferences, push_token } = createUserDto;
-    const existingUser = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (existingUser) {
-      throw new ConflictException("User with this email already exists");
-    }
 
-    const salt = await bcrypt.genSalt();
-    const password_hash = await bcrypt.hash(password, salt);
+    return this.userRepository.manager.transaction(async (em) => {
+      const userRepo = em.getRepository(User);
+      const prefRepo = em.getRepository(UserPreference);
+      const deviceRepo = em.getRepository(UserDevice);
 
-    // 1 Create preference
-    const newPreference = this.preferenceRepository.create({
-      email_notifications: preferences.email_notifications,
-      push_notifications: preferences.push_notifications,
-    });
-    // Save first in order to link it
-    await this.preferenceRepository.save(newPreference);
+      const existingUser = await userRepo.findOne({ where: { email } });
+      if (existingUser) {
+        throw new ConflictException("User with this email already exists");
+      }
 
-    //2 Create the user
-    const newUser = this.userRepository.create({
-      name,
-      email,
-      password_hash,
-      preference: newPreference, // Link saved preference
-    });
-    // Save the user
-    await this.userRepository.save(newUser);
+      if (push_token) {
+        const existingDevice = await deviceRepo.findOne({
+          where: { device_token: push_token },
+          relations: ["user"],
+        });
+        if (existingDevice) {
+          throw new ConflictException("Device token already registered");
+        }
+      }
 
-    //3 Handle the devive
-    if (push_token) {
-      const newDevice = this.deviceRepository.create({
-        device_token: push_token,
-        user: newUser,
-        device_type: "unknown",
+      const salt = await bcrypt.genSalt();
+      const password_hash = await bcrypt.hash(password, salt);
+
+      const pref = prefRepo.create({
+        email_notifications: preferences.email_notifications,
+        push_notifications: preferences.push_notifications,
       });
-      // Save the device
-      await this.deviceRepository.save(newDevice);
-    }
+      await prefRepo.save(pref);
 
-    // Return the user
-    return newUser;
+      const user = userRepo.create({
+        name,
+        email,
+        password_hash,
+        preference: pref,
+      });
+      await userRepo.save(user);
+
+      if (push_token) {
+        const device = deviceRepo.create({
+          device_token: push_token,
+          device_type: "unknown",
+          user,
+        });
+        await deviceRepo.save(device);
+      }
+
+      return user;
+    });
   }
 
   async getContactInfo(id: string) {
